@@ -14,6 +14,6 @@ class HomeListCell: UICollectionViewCell {
 
     func configure(item: InfoData) {
         infoTitleLabel.text = item.title
-        infoEmojiLabel.text = item.category.emoji
+//        infoEmojiLabel.text = item.category.emoji
     }
 }
