@@ -33,7 +33,7 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        updateNavigationItem()
         navigationItem.title = "아그모"
         
         dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
@@ -49,6 +49,29 @@ class HomeViewController: UIViewController {
         dataSource.apply(snapshot)
         
         collectionView.collectionViewLayout = layout()
+    }
+    
+    private func updateNavigationItem() {
+        let checekConfig = CustomBarItemConfiguration(
+            image: UIImage(systemName: "checkmark.circle"),
+            handler: { }
+        )
+        let checekItem = UIBarButtonItem.generate(with: checekConfig, width: 30)
+        
+        let folderConfig = CustomBarItemConfiguration(
+            image: UIImage(systemName: "folder"),
+            handler: { }
+        )
+        let folderItem = UIBarButtonItem.generate(with: folderConfig, width: 30)
+        
+        let settingConfig = CustomBarItemConfiguration(
+            image: UIImage(systemName: "gearshape"),
+            handler: { }
+        )
+        let settingItem = UIBarButtonItem.generate(with: settingConfig, width: 30)
+        
+        navigationItem.leftBarButtonItem = checekItem
+        navigationItem.rightBarButtonItems = [settingItem, folderItem]
     }
     
     private func configureCell(for section: Section, item: Item, collectionView: UICollectionView, indexPath: IndexPath) -> UICollectionViewCell? {
