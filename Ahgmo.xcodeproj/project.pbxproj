@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		4E02C65C2D1D4FE600457A80 /* Home.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4E02C65A2D1D4FE500457A80 /* Home.storyboard */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		4ECB0D912D1417A300ADDA3C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +28,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4E02C65B2D1D4FE600457A80 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Ahgmo/Views/Base.lproj/Home.storyboard; sourceTree = "<group>"; };
 		4ECB0D772D1417A100ADDA3C /* Ahgmo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ahgmo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ECB0D902D1417A300ADDA3C /* AhgmoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AhgmoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ECB0D9A2D1417A300ADDA3C /* AhgmoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AhgmoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -88,6 +93,7 @@
 		4ECB0D6E2D1417A100ADDA3C = {
 			isa = PBXGroup;
 			children = (
+				4E02C65A2D1D4FE500457A80 /* Home.storyboard */,
 				4ECB0D792D1417A100ADDA3C /* Ahgmo */,
 				4ECB0D932D1417A300ADDA3C /* AhgmoTests */,
 				4ECB0D9D2D1417A300ADDA3C /* AhgmoUITests */,
@@ -225,6 +231,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4E02C65C2D1D4FE600457A80 /* Home.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -280,6 +287,17 @@
 			targetProxy = 4ECB0D9B2D1417A300ADDA3C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		4E02C65A2D1D4FE500457A80 /* Home.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4E02C65B2D1D4FE600457A80 /* Base */,
+			);
+			name = Home.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		4ECB0DA42D1417A300ADDA3C /* Debug */ = {
