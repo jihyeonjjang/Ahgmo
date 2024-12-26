@@ -34,7 +34,7 @@ class HomeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         updateNavigationItem()
-        navigationItem.title = "아그모"
+        embedSearchControl()
         
         dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
             guard let section = Section(rawValue: indexPath.section) else { return nil }
@@ -72,6 +72,16 @@ class HomeViewController: UIViewController {
         
         navigationItem.leftBarButtonItem = checekItem
         navigationItem.rightBarButtonItems = [settingItem, folderItem]
+    }
+    
+    private func embedSearchControl() {
+        self.navigationItem.title = "아그모"
+        
+        let searchController = UISearchController(searchResultsController: nil)
+//        searchController.hidesNavigationBarDuringPresentation = false
+        searchController.searchBar.placeholder = "Search"
+        searchController.searchBar.delegate = self
+        self.navigationItem.searchController = searchController
     }
     
     private func configureCell(for section: Section, item: Item, collectionView: UICollectionView, indexPath: IndexPath) -> UICollectionViewCell? {
@@ -135,3 +145,9 @@ class HomeViewController: UIViewController {
     }
 }
 
+extension HomeViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        guard let keyword = searchBar.text, !keyword.isEmpty else { return }
+        
+    }
+}
