@@ -10,76 +10,88 @@ import UIKit
 class HomeViewController: UIViewController {
 
     @IBOutlet weak var collectionView: UICollectionView!
-    enum Item: Hashable {
-        case categoryData(CategoryData)
-        case infoData(InfoData)
-    }
+    @IBOutlet weak var tableView: UITableView!
+
+    typealias CollectionItem = CategoryData
+    typealias TableItem = InfoData
+    
     enum Section: Int {
-        case category
         case main
     }
+    var categoryItems: [CategoryData] = CategoryData.list
+    var infoItems: [InfoData] = InfoData.list
     
-    var categorySectionItems = CategoryData.list.map { Item.categoryData($0) }
-    var mainSectionItems = InfoData.list.map { Item.infoData($0) }
+    var numberOfInfoList = 3
     
-//    struct MySendableStruct: Sendable, Hashable {
-//        let infoData: InfoData
-//        let categoryData: CategoryData
-//    }
-//
-//    typealias Item = MySendableStruct
-    
-    var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
+    var collectionViewDataSource: UICollectionViewDiffableDataSource<Section, CollectionItem>!
+    var tableViewDataSource: UITableViewDiffableDataSource<Section, TableItem>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        updateNavigationItem()
+        configureNavigationItem()
         embedSearchControl()
         
-        dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
-            guard let section = Section(rawValue: indexPath.section) else { return nil }
-            let cell = self.configureCell(for: section, item: item, collectionView: collectionView, indexPath: indexPath)
+        collectionViewDataSource = UICollectionViewDiffableDataSource<Section, CollectionItem>(collectionView: collectionView) { collectionView, indexPath, item in
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCategoryCell", for: indexPath) as? HomeCategoryCell else { return nil }
+            cell.configure(item: item)
             return cell
         }
         
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
-        snapshot.appendSections([.category, .main])
-        snapshot.appendItems(categorySectionItems, toSection: .category)
-        snapshot.appendItems(mainSectionItems, toSection: .main)
-        dataSource.apply(snapshot)
+        tableViewDataSource = UITableViewDiffableDataSource<Section, TableItem>(tableView: tableView) { tableView, indexPath, item in
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "HomeListCell", for: indexPath) as? HomeListCell else { return UITableViewCell() }
+            cell.configure(item: item)
+            return cell
+        }
+        
+        var collectionViewSnapshot = NSDiffableDataSourceSnapshot<Section, CollectionItem>()
+        collectionViewSnapshot.appendSections([.main])
+        collectionViewSnapshot.appendItems(categoryItems, toSection: .main)
+        collectionViewDataSource.apply(collectionViewSnapshot)
+        
+        var tableViewSnapshot = NSDiffableDataSourceSnapshot<Section, TableItem>()
+        tableViewSnapshot.appendSections([.main])
+        tableViewSnapshot.appendItems(infoItems, toSection: .main)
+        tableViewDataSource.apply(tableViewSnapshot)
         
         collectionView.collectionViewLayout = layout()
     }
     
-    private func updateNavigationItem() {
+    private func labelBarButtonItem(text: String) -> UIBarButtonItem {
+        let label = UILabel()
+        label.text = "\(text)"
+        return UIBarButtonItem(customView: label)
+    }
+    
+    private func configureNavigationItem() {
         self.navigationItem.title = "아그모"
+    
+        let selectItem = UIBarButtonItem(image: UIImage(systemName: "checklist"), style: .plain, target: self, action: #selector(toggleEditing))
+        let doneItem = UIBarButtonItem(title: "완료", style: .plain, target: self, action: #selector(toggleEditing))
+        let settingItem = UIBarButtonItem(image: UIImage(systemName: "gearshape"), style: .plain, target: self, action: nil)
         
-        let checkItem = UIBarButtonItem(image: UIImage(systemName: "checkmark.circle"), style: .plain, target: self, action: nil)
-        let settingItem = UIBarButtonItem(image: UIImage(systemName: "folder"), style: .plain, target: self, action: nil)
-        
-        navigationItem.leftBarButtonItem = checkItem
+        navigationItem.leftBarButtonItem = tableView.isEditing ? doneItem : selectItem
         navigationItem.rightBarButtonItem = settingItem
         
         self.navigationController?.isToolbarHidden = false
-        
-        var categoryButton: UIBarButtonItem!
-        var numberLabel: UIBarButtonItem!
-        var plusButton: UIBarButtonItem!
         let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
         
-        categoryButton = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: nil)
-        var label = UILabel()
-        label.text = "3개의 항목"
-        numberLabel = UIBarButtonItem(customView: label)
-        plusButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: nil)
+        let categoryButton = UIBarButtonItem(image: UIImage(systemName: "folder"), style: .plain, target: self, action: nil)
+        let numberInfoLabel = labelBarButtonItem(text: "\(numberOfInfoList)개의 항목")
+        let plusButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: nil)
+        let defaultToolBarItems = [categoryButton, flexibleSpace, numberInfoLabel, flexibleSpace, plusButton]
         
-        var items = [UIBarButtonItem]()
-
-        [categoryButton,flexibleSpace,numberLabel,flexibleSpace,plusButton].forEach {
-            items.append($0)
-        }
-
+        let numberSelectLabel = labelBarButtonItem(text: "0개 선택")
+        let deleteButton = UIBarButtonItem(title: "삭제", style: .plain, target: self, action: nil)
+        let editToolBarItems = [flexibleSpace, numberSelectLabel, flexibleSpace, deleteButton]
+        
+        let items: [UIBarButtonItem] = tableView.isEditing ? editToolBarItems : defaultToolBarItems
+        
         self.toolbarItems = items
+    }
+    
+    @objc private func toggleEditing() {
+        tableView.setEditing(!tableView.isEditing, animated: true)
+        configureNavigationItem()
     }
     
     private func embedSearchControl() {
@@ -90,42 +102,11 @@ class HomeViewController: UIViewController {
         self.navigationItem.searchController = searchController
     }
     
-    private func configureCell(for section: Section, item: Item, collectionView: UICollectionView, indexPath: IndexPath) -> UICollectionViewCell? {
-        switch section {
-        case .category:
-            if case .categoryData(let category) = item {
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCategoryCell", for: indexPath) as! HomeCategoryCell
-                cell.configure(item: category)
-                return cell
-            } else { return nil }
-        case .main:
-            if case .infoData(let info) = item {
-                let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeListCell", for: indexPath) as! HomeListCell
-                cell.configure(item: info)
-                return cell
-            } else { return nil }
-        }
-    }
-    
     private func layout() -> UICollectionViewCompositionalLayout {
-        let layout = UICollectionViewCompositionalLayout{ sectionIndex, layoutEnvironment in
-            switch sectionIndex {
-            case 0:
-                return self.createCategorySection()
-            case 1:
-                return self.createInfoSection()
-            default:
-                return self.createInfoSection()
-            }
-        }
-        return layout
-    }
-    
-    private func createCategorySection() -> NSCollectionLayoutSection {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .estimated(50), heightDimension: .absolute(30))
+        let itemSize = NSCollectionLayoutSize(widthDimension: .estimated(100), heightDimension: .absolute(40))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
-        let groupSize = NSCollectionLayoutSize(widthDimension: .estimated(50), heightDimension: .absolute(30))
+        let groupSize = NSCollectionLayoutSize(widthDimension: .estimated(100), heightDimension: .absolute(40))
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
 //        group.interItemSpacing = NSCollectionLayoutSpacing.fixed(7)
         
@@ -133,21 +114,8 @@ class HomeViewController: UIViewController {
         section.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 15, bottom: 0, trailing: 15)
         section.interGroupSpacing = 10
         section.orthogonalScrollingBehavior = .continuousGroupLeadingBoundary
-        
-        return section
-    }
-    
-    private func createInfoSection() -> NSCollectionLayoutSection {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(80))
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
 
-        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(80))
-        let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
-        
-        let section = NSCollectionLayoutSection(group: group)
-//        section.orthogonalScrollingBehavior = .continuousGroupLeadingBoundary
-
-        return section
+        return UICollectionViewCompositionalLayout(section: section)
     }
 }
 
