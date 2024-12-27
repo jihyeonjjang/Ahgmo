@@ -52,31 +52,37 @@ class HomeViewController: UIViewController {
     }
     
     private func updateNavigationItem() {
-        let checekConfig = CustomBarItemConfiguration(
-            image: UIImage(systemName: "checkmark.circle"),
-            handler: { }
-        )
-        let checekItem = UIBarButtonItem.generate(with: checekConfig, width: 30)
+        self.navigationItem.title = "아그모"
         
-        let folderConfig = CustomBarItemConfiguration(
-            image: UIImage(systemName: "folder"),
-            handler: { }
-        )
-        let folderItem = UIBarButtonItem.generate(with: folderConfig, width: 30)
+        let checkItem = UIBarButtonItem(image: UIImage(systemName: "checkmark.circle"), style: .plain, target: self, action: nil)
+        let settingItem = UIBarButtonItem(image: UIImage(systemName: "folder"), style: .plain, target: self, action: nil)
         
-        let settingConfig = CustomBarItemConfiguration(
-            image: UIImage(systemName: "gearshape"),
-            handler: { }
-        )
-        let settingItem = UIBarButtonItem.generate(with: settingConfig, width: 30)
+        navigationItem.leftBarButtonItem = checkItem
+        navigationItem.rightBarButtonItem = settingItem
         
-        navigationItem.leftBarButtonItem = checekItem
-        navigationItem.rightBarButtonItems = [settingItem, folderItem]
+        self.navigationController?.isToolbarHidden = false
+        
+        var categoryButton: UIBarButtonItem!
+        var numberLabel: UIBarButtonItem!
+        var plusButton: UIBarButtonItem!
+        let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
+        
+        categoryButton = UIBarButtonItem(barButtonSystemItem: .action, target: self, action: nil)
+        var label = UILabel()
+        label.text = "3개의 항목"
+        numberLabel = UIBarButtonItem(customView: label)
+        plusButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: nil)
+        
+        var items = [UIBarButtonItem]()
+
+        [categoryButton,flexibleSpace,numberLabel,flexibleSpace,plusButton].forEach {
+            items.append($0)
+        }
+
+        self.toolbarItems = items
     }
     
     private func embedSearchControl() {
-        self.navigationItem.title = "아그모"
-        
         let searchController = UISearchController(searchResultsController: nil)
 //        searchController.hidesNavigationBarDuringPresentation = false
         searchController.searchBar.placeholder = "Search"
