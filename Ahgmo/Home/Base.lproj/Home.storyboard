@@ -2,6 +2,7 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
+        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -18,7 +19,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="gUo-Sc-UKr">
-                                <rect key="frame" x="0.0" y="103" width="393" height="715"/>
+                                <rect key="frame" x="0.0" y="59" width="393" height="710"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="DXP-C7-Lse">
                                     <size key="itemSize" width="128" height="128"/>
@@ -93,27 +94,14 @@
                                     </collectionViewCell>
                                 </cells>
                             </collectionView>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="J9P-tb-ZXv">
-                                <rect key="frame" x="293" y="738" width="70" height="70"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="70" id="4wb-3d-VKS"/>
-                                    <constraint firstAttribute="width" secondItem="J9P-tb-ZXv" secondAttribute="height" multiplier="1:1" id="Fbp-qA-5uI"/>
-                                </constraints>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="tinted" title="+">
-                                    <fontDescription key="titleFontDescription" type="boldSystem" pointSize="40"/>
-                                </buttonConfiguration>
-                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="J9P-tb-ZXv" secondAttribute="bottom" constant="10" id="319-sm-Kvi"/>
                             <constraint firstItem="gUo-Sc-UKr" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="LNA-Oh-AO1"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="top" secondItem="gUo-Sc-UKr" secondAttribute="top" id="bd7-8K-3OC"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="gUo-Sc-UKr" secondAttribute="bottom" id="l2v-67-uGN"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="gUo-Sc-UKr" secondAttribute="bottom" constant="49" id="l2v-67-uGN"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="gUo-Sc-UKr" secondAttribute="trailing" id="uRV-nv-a2l"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="J9P-tb-ZXv" secondAttribute="trailing" constant="30" id="ur0-kw-8Fh"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="wvX-GC-fJg"/>
