@@ -10,13 +10,17 @@
         <!--Main Navigation View Controller-->
         <scene sceneID="RQG-VE-2kX">
             <objects>
-                <navigationController storyboardIdentifier="MainNavigationViewController" automaticallyAdjustsScrollViewInsets="NO" id="ysp-xT-9dx" customClass="MainNavigationViewController" customModule="Ahgmo" customModuleProvider="target" sceneMemberID="viewController">
+                <navigationController storyboardIdentifier="MainNavigationViewController" automaticallyAdjustsScrollViewInsets="NO" toolbarHidden="NO" id="ysp-xT-9dx" customClass="MainNavigationViewController" customModule="Ahgmo" customModuleProvider="target" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" largeTitles="YES" id="t7g-Ru-sni">
                         <rect key="frame" x="0.0" y="59" width="393" height="96"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
+                    <toolbar key="toolbar" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="ANV-gj-1QH">
+                        <rect key="frame" x="0.0" y="769" width="393" height="49"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </toolbar>
                     <connections>
                         <segue destination="OWr-Gk-gFq" kind="relationship" relationship="rootViewController" id="1vB-65-MGA"/>
                     </connections>
