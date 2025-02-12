@@ -15,7 +15,6 @@ struct CategoryData: Codable, Hashable {
 
 extension CategoryData {
     static let list = [
-        CategoryData(title: "모두보기"),
         CategoryData(title: "요리"),
         CategoryData(title: "신발"),
         CategoryData(title: "화장품"),

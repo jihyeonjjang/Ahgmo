@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		4E9877392D5345B400100854 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 4E9877382D5345B400100854 /* SwiftSoup */; };
+		4E98773C2D5345BB00100854 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 4E98773B2D5345BB00100854 /* Kingfisher */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		4ECB0D912D1417A300ADDA3C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,6 +70,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4E98773C2D5345BB00100854 /* Kingfisher in Frameworks */,
+				4E9877392D5345B400100854 /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -124,8 +131,6 @@
 				4ECB0D792D1417A100ADDA3C /* Ahgmo */,
 			);
 			name = Ahgmo;
-			packageProductDependencies = (
-			);
 			productName = Ahgmo;
 			productReference = 4ECB0D772D1417A100ADDA3C /* Ahgmo.app */;
 			productType = "com.apple.product-type.application";
@@ -134,6 +139,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4ECB0DA82D1417A300ADDA3C /* Build configuration list for PBXNativeTarget "AhgmoTests" */;
 			buildPhases = (
+				8B52B953B873357356E630C6 /* [CP] Check Pods Manifest.lock */,
 				4ECB0D8C2D1417A300ADDA3C /* Sources */,
 				4ECB0D8D2D1417A300ADDA3C /* Frameworks */,
 				4ECB0D8E2D1417A300ADDA3C /* Resources */,
@@ -147,8 +153,6 @@
 				4ECB0D932D1417A300ADDA3C /* AhgmoTests */,
 			);
 			name = AhgmoTests;
-			packageProductDependencies = (
-			);
 			productName = AhgmoTests;
 			productReference = 4ECB0D902D1417A300ADDA3C /* AhgmoTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -157,9 +161,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4ECB0DAB2D1417A300ADDA3C /* Build configuration list for PBXNativeTarget "AhgmoUITests" */;
 			buildPhases = (
+				5E24034871F306091E1A2CAE /* [CP] Check Pods Manifest.lock */,
 				4ECB0D962D1417A300ADDA3C /* Sources */,
 				4ECB0D972D1417A300ADDA3C /* Frameworks */,
 				4ECB0D982D1417A300ADDA3C /* Resources */,
+				2764F8037D84369FA278D593 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -170,8 +176,6 @@
 				4ECB0D9D2D1417A300ADDA3C /* AhgmoUITests */,
 			);
 			name = AhgmoUITests;
-			packageProductDependencies = (
-			);
 			productName = AhgmoUITests;
 			productReference = 4ECB0D9A2D1417A300ADDA3C /* AhgmoUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -208,6 +212,10 @@
 			);
 			mainGroup = 4ECB0D6E2D1417A100ADDA3C;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				4E9877372D5345B400100854 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+				4E98773A2D5345BB00100854 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4ECB0D782D1417A100ADDA3C /* Products */;
 			projectDirPath = "";
@@ -243,6 +251,70 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		2764F8037D84369FA278D593 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Ahgmo-AhgmoUITests/Pods-Ahgmo-AhgmoUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Ahgmo-AhgmoUITests/Pods-Ahgmo-AhgmoUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Ahgmo-AhgmoUITests/Pods-Ahgmo-AhgmoUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5E24034871F306091E1A2CAE /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Ahgmo-AhgmoUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8B52B953B873357356E630C6 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-AhgmoTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4ECB0D732D1417A100ADDA3C /* Sources */ = {
@@ -579,6 +651,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4E9877372D5345B400100854 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/scinfu/SwiftSoup";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.7.7;
+			};
+		};
+		4E98773A2D5345BB00100854 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4E9877382D5345B400100854 /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4E9877372D5345B400100854 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+		4E98773B2D5345BB00100854 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4E98773A2D5345BB00100854 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4ECB0D6F2D1417A100ADDA3C /* Project object */;
 }

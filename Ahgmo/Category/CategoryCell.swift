@@ -9,4 +9,9 @@ import UIKit
 
 class CategoryCell: UICollectionViewCell {
     
+    @IBOutlet weak var titleLabel: UILabel!
+    
+    func configure(item: CategoryData) {
+        titleLabel.text = item.title
+    }
 }

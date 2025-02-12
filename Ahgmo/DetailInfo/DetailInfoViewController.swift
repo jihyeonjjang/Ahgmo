@@ -6,24 +6,124 @@
 //
 
 import UIKit
+import Kingfisher
 
 class DetailInfoViewController: UIViewController {
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+    @IBOutlet weak var thumbnailImageView: UIImageView!
+    @IBOutlet weak var titleLabel: UILabel!
+    @IBOutlet weak var categoryLabel: UILabel!
+    
+    @IBOutlet weak var collectionView: UICollectionView!
+    
+    var information: InfoData = InfoData(title: "Unknown", description: "", urlString: "", imageURL: "", category: CategoryData(title: ""))
+    
+    enum Section: Int, CaseIterable {
+        case url
+        case description
+        
+        var title: String {
+            switch self {
+            case .url: return "URL"
+            case .description: return "설명"
+            }
+        }
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    typealias Item = InfoData
+    
+    var infoItems: [InfoData] = InfoData.list
+    
+    var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        configureNavigationItem()
+        configureCollectionView()
+        updateUI()
+        navigationController?.setToolbarHidden(true, animated: true)
     }
-    */
-
+    
+    private func configureNavigationItem() {
+        self.navigationItem.largeTitleDisplayMode = .never
+        let deleteItem = UIBarButtonItem(
+            image: UIImage(systemName: "trash"),
+            style: .plain,
+            target: self,
+            action: nil
+        )
+        
+        let editItem = UIBarButtonItem(
+            title: "편집",
+            style: .plain,
+            target: self,
+            action: #selector(navigateToPage(_:))
+        )
+        
+        navigationItem.rightBarButtonItems = [deleteItem, editItem]
+    }
+    
+    @objc private func navigateToPage(_ sender: UIBarButtonItem) {
+        let storyboard = UIStoryboard(name: "EditInfo", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "EditInfoViewController") as! EditInfoViewController
+        vc.information = information
+        let navigationController = UINavigationController(rootViewController: vc)
+        self.navigationController?.present(navigationController, animated: true)
+    }
+    
+    private func configureCollectionView() {
+        let headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(elementKind: UICollectionView.elementKindSectionHeader) { cell, _, indexPath in
+            let section = Section.allCases[indexPath.section]
+            var content = UIListContentConfiguration.plainHeader()
+            content.text = section.title
+            //            content.textProperties.font = .boldSystemFont(ofSize: 16)
+            cell.contentConfiguration = content
+        }
+        
+        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, indexPath, item in
+            var content = UIListContentConfiguration.cell()
+            let section = Section(rawValue: indexPath.section)
+            if section == .url {
+                content.text = item.urlString
+            } else {
+                content.text = item.description
+            }
+            cell.contentConfiguration = content
+        }
+        
+        dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
+            collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
+        }
+        
+        dataSource.supplementaryViewProvider = { (collectionView, elementKind, indexPath) in
+            if elementKind == UICollectionView.elementKindSectionHeader {
+                return collectionView.dequeueConfiguredReusableSupplementary(using: headerRegistration, for: indexPath)
+            }
+            return nil
+        }
+        
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
+        snapshot.appendSections(Section.allCases)
+        snapshot.appendItems([InfoData(title: information.title, description: "", urlString: information.urlString, imageURL: "", category: CategoryData(title: ""))], toSection: .url)
+        snapshot.appendItems([InfoData(title: information.title, description: information.description, urlString: "", imageURL: "", category: CategoryData(title: ""))], toSection: .description)
+        dataSource.apply(snapshot)
+        
+        collectionView.collectionViewLayout = layout()
+    }
+    
+    private func updateUI() {
+        thumbnailImageView.kf.setImage(
+            with: URL(string: information.imageURL)!,
+            placeholder: UIImage(systemName: "hands.sparkles.fill"))
+        thumbnailImageView.layer.cornerRadius = 20
+        
+        titleLabel.text = information.title
+        categoryLabel.text = information.category.title
+    }
+    
+    private func layout() -> UICollectionViewCompositionalLayout {
+        var configuration = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
+        configuration.headerMode = .supplementary
+        
+        return UICollectionViewCompositionalLayout.list(using: configuration)
+    }
 }
