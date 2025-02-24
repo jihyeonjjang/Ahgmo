@@ -10,6 +10,7 @@ import Foundation
 struct CategoryData: Codable, Hashable {
 
     let title: String
+    var isSelected: Bool = false
 //    let emoji: String
 }
 
