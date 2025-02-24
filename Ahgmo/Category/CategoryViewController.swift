@@ -8,15 +8,16 @@
 import UIKit
 
 class CategoryViewController: UIViewController {
-
-    @IBOutlet weak var collectionView: UICollectionView!
     enum Section {
         case main
     }
     typealias Item = CategoryData
-    let categoryItems: [CategoryData] = CategoryData.list
     
+    var categoryItems: [CategoryData] = CategoryData.list
+    
+    var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
+    var searchController: UISearchController!
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -28,22 +29,7 @@ class CategoryViewController: UIViewController {
         
         configureNavigationItem()
         embedSearchControl()
-        
-        dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
-            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CategoryCell", for: indexPath) as? CategoryCell else { return nil }
-            cell.configure(item: item)
-            return cell
-        }
-        
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
-        snapshot.appendSections([.main])
-        snapshot.appendItems(categoryItems, toSection: .main)
-        dataSource.apply(snapshot)
-        
-        collectionView.collectionViewLayout = layout()
-        
-        collectionView?.contentInsetAdjustmentBehavior = .never
-        collectionView.delegate = self
+        configureCollectionView()
     }
 
     private func configureNavigationItem() {
@@ -51,21 +37,16 @@ class CategoryViewController: UIViewController {
         self.navigationController?.navigationBar.prefersLargeTitles = true
         self.navigationItem.largeTitleDisplayMode = .always
         
-        let editItem = UIBarButtonItem(
-            title: "편집",
-            style: .plain,
-            target: self,
-            action: nil
-//                #selector(toggleEditing)
-        )
-        
         let plusItem = UIBarButtonItem(
             barButtonSystemItem: .add,
             target: self,
             action: #selector(navigateToPage(_:))
         )
         
-        navigationItem.rightBarButtonItems = [plusItem, editItem]
+        navigationItem.rightBarButtonItems = [plusItem, editButtonItem]
+        if let editButton = navigationItem.rightBarButtonItems?.first(where: { $0 == editButtonItem }) {
+            editButton.title = isEditing ? "완료" : "편집"
+        }
     }
     
     @objc private func navigateToPage(_ sender: UIBarButtonItem) {
@@ -76,8 +57,17 @@ class CategoryViewController: UIViewController {
         self.navigationController?.present(navigationController, animated: true)
     }
     
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        
+        if let editButton = navigationItem.rightBarButtonItems?.first(where: { $0 == editButtonItem }) {
+            editButton.title = isEditing ? "완료" : "편집"
+        }
+        collectionView.isEditing = editing
+    }
+    
     private func embedSearchControl() {
-        let searchController = UISearchController(searchResultsController: nil)
+        searchController = UISearchController(searchResultsController: nil)
         searchController.hidesNavigationBarDuringPresentation = false
         searchController.searchBar.placeholder = "Search"
         searchController.searchBar.delegate = self
@@ -85,9 +75,70 @@ class CategoryViewController: UIViewController {
         self.navigationItem.hidesSearchBarWhenScrolling = false
     }
     
-    private func layout() -> UICollectionViewCompositionalLayout {
+    private func configureCollectionView() {
         let config = UICollectionLayoutListConfiguration(appearance: .plain)
-        return UICollectionViewCompositionalLayout.list(using: config)
+        let layout = UICollectionViewCompositionalLayout.list(using: config)
+        
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.autoresizingMask = []
+        
+        view.addSubview(collectionView)
+        
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        ])
+        
+        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, indexPath, item in
+            var content = UIListContentConfiguration.cell()
+            content.text = item.title
+            cell.contentConfiguration = content
+            
+            let accessories: [UICellAccessory] = [
+                .delete(displayed: .whenEditing, actionHandler: { [weak self] in
+                    self?.deleteItem(item)
+                })
+            ]
+            
+            cell.accessories = accessories
+        }
+        
+        dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
+            collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
+        }
+        
+        applySnapshot()
+        
+        collectionView?.contentInsetAdjustmentBehavior = .never
+        collectionView.delegate = self
+        collectionView.keyboardDismissMode = .onDrag
+    }
+    
+    private func deleteItem(_ item: Item) {
+        guard let indexPath = dataSource.indexPath(for: item) else {
+            return
+        }
+        categoryItems.remove(at: indexPath.item)
+        
+        var snapshot = dataSource.snapshot()
+        snapshot.deleteItems([item])
+        dataSource.apply(snapshot, animatingDifferences: true)
+    }
+    
+    private func applySnapshot() {
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(categoryItems, toSection: .main)
+        dataSource.apply(snapshot)
+    }
+    
+    private func updateSnapshot(item: Item) {
+        var snapshot = dataSource.snapshot()
+        snapshot.reloadItems([item])
+        dataSource.apply(snapshot)
     }
 }
 
@@ -102,9 +153,14 @@ extension CategoryViewController: UICollectionViewDelegate, UISearchBarDelegate 
         self.navigationController?.pushViewController(vc, animated: true)
         collectionView.deselectItem(at: indexPath, animated: true)
     }
+    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.endEditing(true)
         guard let keyword = searchBar.text, !keyword.isEmpty else { return }
-        
+        print("\(keyword)")
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        collectionView.reloadData()
     }
 }
-
