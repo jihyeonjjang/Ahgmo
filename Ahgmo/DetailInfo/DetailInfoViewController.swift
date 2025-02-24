@@ -7,6 +7,7 @@
 
 import UIKit
 import Kingfisher
+import SafariServices
 
 class DetailInfoViewController: UIViewController {
     @IBOutlet weak var thumbnailImageView: UIImageView!
@@ -101,13 +102,18 @@ class DetailInfoViewController: UIViewController {
             return nil
         }
         
+        applySnapshot()
+        
+        collectionView.collectionViewLayout = layout()
+        collectionView.delegate = self
+    }
+    
+    private func applySnapshot() {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
         snapshot.appendSections(Section.allCases)
         snapshot.appendItems([InfoData(title: information.title, description: "", urlString: information.urlString, imageURL: "", category: CategoryData(title: ""))], toSection: .url)
         snapshot.appendItems([InfoData(title: information.title, description: information.description, urlString: "", imageURL: "", category: CategoryData(title: ""))], toSection: .description)
         dataSource.apply(snapshot)
-        
-        collectionView.collectionViewLayout = layout()
     }
     
     private func updateUI() {
@@ -125,5 +131,18 @@ class DetailInfoViewController: UIViewController {
         configuration.headerMode = .supplementary
         
         return UICollectionViewCompositionalLayout.list(using: configuration)
+    }
+}
+
+extension DetailInfoViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if Section(rawValue: indexPath.section) == .url {
+            guard let url = URL(string: information.urlString) else {
+                return
+            }
+            
+            let safari = SFSafariViewController(url: url)
+            present(safari, animated: true)
+        }
     }
 }
