@@ -39,6 +39,7 @@ class EditInfoViewController: UIViewController {
         configureNavigationItem()
         setupCollectionView()
         applySnapshot()
+        hideKeyBoardWhenTappedScreen()
     }
     
     private func configureNavigationItem() {
@@ -83,6 +84,7 @@ class EditInfoViewController: UIViewController {
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(collectionView)
+        collectionView.keyboardDismissMode = .onDrag
         
         let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, indexPath, item in
             let section = Section(rawValue: indexPath.section)
@@ -92,7 +94,16 @@ class EditInfoViewController: UIViewController {
                 //                textField.placeholder = item.title
                 textField.clearButtonMode = .whileEditing
                 textField.frame = CGRect(x: 20, y: 0, width: cell.bounds.width, height: cell.bounds.height)
+                textField.delegate = self
+                
                 cell.contentView.addSubview(textField)
+                
+                textField.translatesAutoresizingMaskIntoConstraints = false
+                NSLayoutConstraint.activate([
+                    textField.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 20),
+                    textField.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -10),
+                    textField.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+                ])
             } else if section == .description {
                 let textField = UITextField()
                 textField.text = self.information.description
@@ -100,6 +111,12 @@ class EditInfoViewController: UIViewController {
                 textField.clearButtonMode = .whileEditing
                 textField.frame = CGRect(x: 20, y: 0, width: cell.bounds.width, height: cell.bounds.height)
                 cell.contentView.addSubview(textField)
+                
+                NSLayoutConstraint.activate([
+                    textField.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 20),
+                    textField.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -10),
+                    textField.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+                ])
             } else if section == .url {
                 let textField = UITextField()
                 textField.text = self.information.urlString
@@ -107,6 +124,12 @@ class EditInfoViewController: UIViewController {
                 textField.clearButtonMode = .whileEditing
                 textField.frame = CGRect(x: 20, y: 0, width: cell.bounds.width, height: cell.bounds.height)
                 cell.contentView.addSubview(textField)
+                
+                NSLayoutConstraint.activate([
+                    textField.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 20),
+                    textField.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -10),
+                    textField.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+                ])
             } else {
                 var content = cell.defaultContentConfiguration()
                 content.text = "카테고리"
@@ -135,7 +158,24 @@ class EditInfoViewController: UIViewController {
     
 }
 
-extension EditInfoViewController: UICollectionViewDelegate {
+extension EditInfoViewController: UICollectionViewDelegate, UITextFieldDelegate, UIGestureRecognizerDelegate {
+    func hideKeyBoardWhenTappedScreen() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc func tapHandler() {
+        print("터치")
+        self.view.endEditing(true)
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        print("return!")
+        self.view.endEditing(true)
+        return true
+    }
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let section = Section(rawValue: indexPath.section)
         if section == .button {

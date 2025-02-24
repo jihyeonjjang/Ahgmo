@@ -22,6 +22,7 @@ class EditCategoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureNavigationItem()
+        hideKeyBoardWhenTappedScreen()
         
         let config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         let layout = UICollectionViewCompositionalLayout.list(using: config)
@@ -29,20 +30,24 @@ class EditCategoryViewController: UIViewController {
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(collectionView)
+        collectionView.keyboardDismissMode = .onDrag
+        collectionView.delegate = self
         
         let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, indexPath, item in
             let textField = UITextField()
             textField.placeholder = "카테고리 이름"
+            textField.clearButtonMode = .always
             textField.text = self.category.title
             textField.frame = CGRect(x: 0, y: 0, width: cell.bounds.width, height: cell.bounds.height)
+            textField.delegate = self
             
             cell.contentView.addSubview(textField)
             
             textField.translatesAutoresizingMaskIntoConstraints = false
-
             NSLayoutConstraint.activate([
                 textField.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 20),
-                textField.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
+                textField.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -10),
+                textField.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
             ])
         }
         
@@ -75,4 +80,27 @@ class EditCategoryViewController: UIViewController {
         self.dismiss(animated: true, completion: nil)
     }
 
+}
+
+extension EditCategoryViewController: UICollectionViewDelegate, UITextFieldDelegate, UIGestureRecognizerDelegate {
+    func hideKeyBoardWhenTappedScreen() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc func tapHandler() {
+        print("터치")
+        self.view.endEditing(true)
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        print("return!")
+        self.view.endEditing(true)
+        return true
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+    }
 }

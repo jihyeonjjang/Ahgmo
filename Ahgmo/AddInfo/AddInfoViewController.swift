@@ -33,6 +33,7 @@ class AddInfoViewController: UIViewController {
         configureNavigationItem()
         setupCollectionView()
         applySnapshot()
+        hideKeyBoardWhenTappedScreen()
     }
     
     private func configureNavigationItem() {
@@ -70,7 +71,6 @@ class AddInfoViewController: UIViewController {
             return
         }
     }
-
     
     private func setupCollectionView() {
         let layoutConfig = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
@@ -79,6 +79,7 @@ class AddInfoViewController: UIViewController {
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(collectionView)
+        collectionView.keyboardDismissMode = .onDrag
         
         let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, indexPath, item in
             let section = Section(rawValue: indexPath.section)
@@ -87,14 +88,15 @@ class AddInfoViewController: UIViewController {
                 textField.placeholder = item.title
                 textField.clearButtonMode = .whileEditing
                 textField.frame = CGRect(x: 0, y: 0, width: cell.bounds.width, height: cell.bounds.height)
+                textField.delegate = self
                 
                 cell.contentView.addSubview(textField)
                 
                 textField.translatesAutoresizingMaskIntoConstraints = false
-
                 NSLayoutConstraint.activate([
                     textField.leadingAnchor.constraint(equalTo: cell.contentView.leadingAnchor, constant: 20),
-                    textField.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
+                    textField.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -10),
+                    textField.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
                 ])
                 
                 
@@ -122,7 +124,6 @@ class AddInfoViewController: UIViewController {
         dataSource.apply(snapshot, animatingDifferences: true)
     }
     
-        
     //        // viewdidload
     //        let url = "https://example.com" // 가져올 웹페이지 URL
     //        ogpFetcher.fetchOGPData(from: url) { [weak self] ogpData in
@@ -166,7 +167,24 @@ class AddInfoViewController: UIViewController {
     //    }
 }
 
-extension AddInfoViewController: UICollectionViewDelegate {
+extension AddInfoViewController: UICollectionViewDelegate, UITextFieldDelegate, UIGestureRecognizerDelegate {
+    func hideKeyBoardWhenTappedScreen() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc func tapHandler() {
+        print("터치")
+        self.view.endEditing(true)
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        print("return!")
+        self.view.endEditing(true)
+        return true
+    }
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let section = Section(rawValue: indexPath.section)
         if section == .button {
@@ -175,8 +193,9 @@ extension AddInfoViewController: UICollectionViewDelegate {
             let navigationController = UINavigationController(rootViewController: vc)
             
             self.navigationController?.present(navigationController, animated: true)
-            collectionView.deselectItem(at: indexPath, animated: true)
+            
         }
+        collectionView.deselectItem(at: indexPath, animated: true)
     }
 }
 
