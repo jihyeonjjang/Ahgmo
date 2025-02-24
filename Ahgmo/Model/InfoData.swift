@@ -18,7 +18,7 @@ struct InfoData: Codable, Hashable {
 }
 
 extension InfoData {
-        static let list = [
+        static var list = [
             InfoData(title: "로제파스타 레시피", description: "편스토랑 류수영 레시피", urlString: "https://youtu.be/myYOcLR8Ni4?si=QYaZ3Fb0AwKKH-oD", imageURL: "https://img.youtube.com/vi/myYOcLR8Ni4/mqdefault.jpg", category: CategoryData(title: "요리")),
             InfoData(title: "호카 본디 8", description: "족저근막염에 좋은 신발", urlString: "https://youtu.be/xDHDEWG1kG4?si=fsXPT7DbxKMgzZEd", imageURL: "https://img.youtube.com/vi/xDHDEWG1kG4/mqdefault.jpg", category: CategoryData(title: "신발")),
             InfoData(title: "다이소 트윙클팝 블러머드팟", description: "3:17 3호 베일모브", urlString: "https://youtu.be/Sz-v47t3aJc?si=eKSM9CmCkjVjqCvP", imageURL: "https://img.youtube.com/vi/Sz-v47t3aJc/mqdefault.jpg", category: CategoryData(title: "화장품")),
