@@ -9,9 +9,10 @@ import UIKit
 
 class HomeCategoryCell: UICollectionViewCell {
     
-    @IBOutlet weak var categoryButton: UIButton!
+    @IBOutlet weak var titleLabel: UILabel!
     
     func configure(item: CategoryData) {
-        categoryButton.setTitle(item.title, for: .normal)
+        titleLabel.text = item.title
+        titleLabel.textColor = item.isSelected ? .systemBackground : .label
     }
 }
