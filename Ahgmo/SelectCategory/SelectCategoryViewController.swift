@@ -8,33 +8,20 @@
 import UIKit
 
 class SelectCategoryViewController: UIViewController {
-    @IBOutlet weak var collectionView: UICollectionView!
-    
     enum Section {
         case main
     }
     typealias Item = CategoryData
     let list: [CategoryData] = CategoryData.list
     
+    var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         configureNavigationItem()
         embedSearchControl()
-        
-        dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
-            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SelectCategoryCell", for: indexPath) as? SelectCategoryCell else { return nil }
-            cell.configure(item: item)
-            return cell
-        }
-        
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
-        snapshot.appendSections([.main])
-        snapshot.appendItems(list, toSection: .main)
-        dataSource.apply(snapshot)
-        
-        collectionView.collectionViewLayout = layout()
+        configureCollectionView()
     }
     
     private func configureNavigationItem() {
@@ -67,7 +54,6 @@ class SelectCategoryViewController: UIViewController {
         case 2:
             let storyboard = UIStoryboard(name: "AddCategory", bundle: nil)
             let vc = storyboard.instantiateViewController(withIdentifier: "AddCategoryViewController") as! AddCategoryViewController
-//            vc.originView = "SelectCategory"
             self.navigationController?.pushViewController(vc, animated: true)
         default:
             return
@@ -83,16 +69,40 @@ class SelectCategoryViewController: UIViewController {
         self.navigationItem.hidesSearchBarWhenScrolling = false
     }
     
-    private func layout() -> UICollectionViewCompositionalLayout {
-        let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(50))
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+    private func configureCollectionView() {
+        let config = UICollectionLayoutListConfiguration(appearance: .plain)
+        let layout = UICollectionViewCompositionalLayout.list(using: config)
         
-        let groupSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1), heightDimension: .absolute(50))
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
+        collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.autoresizingMask = []
+        view.addSubview(collectionView)
         
-        let section = NSCollectionLayoutSection(group: group)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        ])
         
-        return UICollectionViewCompositionalLayout(section: section)
+        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, indexPath, item in
+            var content = UIListContentConfiguration.cell()
+            content.text = item.title
+            cell.contentConfiguration = content
+        }
+        
+        dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
+            collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
+        }
+        
+        applySnapshot()
+    }
+    
+    private func applySnapshot() {
+        var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
+        snapshot.appendSections([.main])
+        snapshot.appendItems(list, toSection: .main)
+        dataSource.apply(snapshot)
     }
 }
 
