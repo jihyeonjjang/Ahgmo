@@ -10,11 +10,11 @@ import Foundation
 struct InfoData: Codable, Hashable {
     
 //    let infoID: UUID
-    let title: String
-    let description: String
-    let urlString: String
-    let imageURL: String
-    let category: CategoryData
+    var title: String
+    var description: String
+    var urlString: String
+    var imageURL: String
+    var category: CategoryData
 }
 
 extension InfoData {
