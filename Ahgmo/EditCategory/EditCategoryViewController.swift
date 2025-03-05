@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 class EditCategoryViewController: UIViewController {
     enum Section {
@@ -13,17 +14,57 @@ class EditCategoryViewController: UIViewController {
     }
     
     typealias Item = CategoryData
+    @Published var category: CategoryData = CategoryData(title: "Unknown")
+    
+    var subscriptions = Set<AnyCancellable>()
+    let keyboardWillHide = PassthroughSubject<Void, Never>()
     
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
     
-    var category: CategoryData = CategoryData(title: "Unknown")
-    
     override func viewDidLoad() {
         super.viewDidLoad()
+        bind()
         configureNavigationItem()
+        configureCollectionView()
         hideKeyBoardWhenTappedScreen()
+    }
+    
+    private func bind() {
+        keyboardWillHide
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.view.endEditing(true)
+            }
+            .store(in: &subscriptions)
         
+        $category
+            .receive(on: RunLoop.main)
+            .sink { [weak self] data in
+                self?.applySnapshot(data)
+            }.store(in: &subscriptions)
+    }
+    
+    private func configureNavigationItem() {
+        self.navigationItem.title = "카테고리 수정"
+        self.navigationItem.largeTitleDisplayMode = .never
+        
+        let doneItem = UIBarButtonItem(
+            title: "완료",
+            style: .plain,
+            target: self,
+            action: #selector(navigateToPage(_:))
+        )
+        
+        navigationItem.rightBarButtonItem = doneItem
+    }
+    
+    @objc private func navigateToPage(_ sender: UIBarButtonItem) {
+        // 임시
+        self.dismiss(animated: true, completion: nil)
+    }
+    
+    private func configureCollectionView() {
         let config = UICollectionLayoutListConfiguration(appearance: .insetGrouped)
         let layout = UICollectionViewCompositionalLayout.list(using: config)
         
@@ -54,52 +95,32 @@ class EditCategoryViewController: UIViewController {
         dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
         }
-        
+    }
+    
+    private func applySnapshot(_ items: CategoryData) {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
         snapshot.appendSections([.main])
-        snapshot.appendItems([CategoryData(title: category.title)], toSection: .main)
+        snapshot.appendItems([CategoryData(title: items.title)], toSection: .main)
         dataSource.apply(snapshot, animatingDifferences: false)
     }
-    
-    private func configureNavigationItem() {
-        self.navigationItem.title = "카테고리 수정"
-        self.navigationItem.largeTitleDisplayMode = .never
-        
-        let doneItem = UIBarButtonItem(
-            title: "완료",
-            style: .plain,
-            target: self,
-            action: #selector(navigateToPage(_:))
-        )
-        
-        navigationItem.rightBarButtonItem = doneItem
-    }
-    
-    @objc private func navigateToPage(_ sender: UIBarButtonItem) {
-        // 임시
-        self.dismiss(animated: true, completion: nil)
-    }
 
+    private func hideKeyBoardWhenTappedScreen() {
+         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
+         tapGesture.cancelsTouchesInView = false
+         view.addGestureRecognizer(tapGesture)
+     }
+     
+     @objc func tapHandler() {
+         keyboardWillHide.send()
+     }
+     
+     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+         keyboardWillHide.send()
+         return true
+     }
 }
 
 extension EditCategoryViewController: UICollectionViewDelegate, UITextFieldDelegate, UIGestureRecognizerDelegate {
-    func hideKeyBoardWhenTappedScreen() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
-        tapGesture.cancelsTouchesInView = false
-        view.addGestureRecognizer(tapGesture)
-    }
-
-    @objc func tapHandler() {
-        print("터치")
-        self.view.endEditing(true)
-    }
-    
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        print("return!")
-        self.view.endEditing(true)
-        return true
-    }
-    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
     }

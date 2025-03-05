@@ -6,14 +6,17 @@
 //
 
 import UIKit
+import Combine
 
 class CategoryViewController: UIViewController {
     enum Section {
         case main
     }
     typealias Item = CategoryData
+    @Published var categoryItems: [CategoryData] = CategoryData.list
     
-    var categoryItems: [CategoryData] = CategoryData.list
+    var subscriptions = Set<AnyCancellable>()
+    let didSelect = PassthroughSubject<CategoryData, Never>()
     
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
@@ -27,11 +30,26 @@ class CategoryViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        bind()
         configureNavigationItem()
         embedSearchControl()
         configureCollectionView()
     }
 
+    private func bind() {
+        didSelect
+            .receive(on: RunLoop.main)
+            .sink { [weak self] selectedItem in
+                self?.presentViewController(item: selectedItem)
+            }.store(in: &subscriptions)
+        
+        $categoryItems
+            .receive(on: RunLoop.main)
+            .sink { [weak self] data in
+                self?.applySnapshot(data)
+        }.store(in: &subscriptions)
+    }
+    
     private func configureNavigationItem() {
         self.navigationItem.title = "카테고리"
         self.navigationController?.navigationBar.prefersLargeTitles = true
@@ -81,6 +99,9 @@ class CategoryViewController: UIViewController {
         
         collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.autoresizingMask = []
+        collectionView?.contentInsetAdjustmentBehavior = .never
+        collectionView.delegate = self
+        collectionView.keyboardDismissMode = .onDrag
         
         view.addSubview(collectionView)
         
@@ -109,12 +130,6 @@ class CategoryViewController: UIViewController {
         dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
             collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
         }
-        
-        applySnapshot()
-        
-        collectionView?.contentInsetAdjustmentBehavior = .never
-        collectionView.delegate = self
-        collectionView.keyboardDismissMode = .onDrag
     }
     
     private func deleteItem(_ item: Item) {
@@ -128,10 +143,10 @@ class CategoryViewController: UIViewController {
         dataSource.apply(snapshot, animatingDifferences: true)
     }
     
-    private func applySnapshot() {
+    private func applySnapshot(_ items: [CategoryData]) {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
         snapshot.appendSections([.main])
-        snapshot.appendItems(categoryItems, toSection: .main)
+        snapshot.appendItems(items, toSection: .main)
         dataSource.apply(snapshot)
     }
     
@@ -140,17 +155,19 @@ class CategoryViewController: UIViewController {
         snapshot.reloadItems([item])
         dataSource.apply(snapshot)
     }
-}
-
-extension CategoryViewController: UICollectionViewDelegate, UISearchBarDelegate {
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let item = categoryItems[indexPath.item]
-        print(">>> selected: \(item.title)")
-        
+    
+    private func presentViewController(item: Item) {
         let storyboard = UIStoryboard(name: "EditCategory", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "EditCategoryViewController") as! EditCategoryViewController
         vc.category = item
         self.navigationController?.pushViewController(vc, animated: true)
+    }
+}
+
+extension CategoryViewController: UICollectionViewDelegate, UISearchBarDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let selectedItem = categoryItems[indexPath.item]
+        didSelect.send(selectedItem)
         collectionView.deselectItem(at: indexPath, animated: true)
     }
     

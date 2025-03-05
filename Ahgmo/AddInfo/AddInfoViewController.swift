@@ -6,9 +6,10 @@
 //
 
 import UIKit
+import Combine
 
 class AddInfoViewController: UIViewController {
-//    private let ogpFetcher = OGPFetcher()
+    //    private let ogpFetcher = OGPFetcher()
     
     enum Section: Int {
         case textField
@@ -17,23 +18,55 @@ class AddInfoViewController: UIViewController {
     
     struct Item: Hashable {
         let title: String
-        let detail: String?
-        
-        init(title: String, detail: String? = nil) {
-            self.title = title
-            self.detail = detail
-        }
     }
+    
+    var subscriptions = Set<AnyCancellable>()
+    let didSelect = PassthroughSubject<Void, Never>()
+    let keyboardWillHide = PassthroughSubject<Void, Never>()
+    @Published var selectedCategory: CategoryData = CategoryData(title: "")
     
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        bind()
         configureNavigationItem()
         setupCollectionView()
         applySnapshot()
         hideKeyBoardWhenTappedScreen()
+    }
+    
+    private func bind() {
+        didSelect
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.presentViewController()
+            }.store(in: &subscriptions)
+        
+        $selectedCategory
+            .receive(on: RunLoop.main)
+            .sink { [weak self] category in
+                self?.updateSnapshot(section: .button)
+            }.store(in: &subscriptions)
+        
+        
+        keyboardWillHide
+            .receive(on: RunLoop.main)
+            .sink { [unowned self] _ in
+                self.view.endEditing(true)
+            }
+            .store(in: &subscriptions)
+        
+        NotificationCenter.default
+            .publisher(for: .didSelectCategory)
+            .compactMap { $0.object as? CategoryData }
+            .receive(on: RunLoop.main)
+            .sink { [weak self] category in
+                self?.selectedCategory = category
+            }
+            .store(in: &subscriptions)
     }
     
     private func configureNavigationItem() {
@@ -101,9 +134,9 @@ class AddInfoViewController: UIViewController {
                 
                 
             } else {
-                var content = cell.defaultContentConfiguration()
+                var content = UIListContentConfiguration.valueCell()
                 content.text = item.title
-                //                content.secondaryText = item.detail // 왜 오른쪽으로 안들어가고 아래로 들어가지?
+                content.secondaryText = self.selectedCategory.title
                 cell.contentConfiguration = content
                 cell.accessories = [.disclosureIndicator()]
             }
@@ -116,12 +149,42 @@ class AddInfoViewController: UIViewController {
         collectionView.delegate = self
     }
     
+    private func updateSnapshot(section: Section) {
+        var snapshot = dataSource.snapshot()
+        snapshot.reloadSections([section])
+        dataSource.apply(snapshot, animatingDifferences: false)
+    }
+    
     private func applySnapshot() {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
         snapshot.appendSections([.textField, .button])
         snapshot.appendItems([Item(title: "제목"), Item(title: "설명"), Item(title: "URL")], toSection: .textField)
-        snapshot.appendItems([Item(title: "카테고리", detail: "요리")], toSection: .button)
+        snapshot.appendItems([Item(title: "카테고리")], toSection: .button)
         dataSource.apply(snapshot, animatingDifferences: true)
+    }
+    
+    private func presentViewController() {
+        let storyboard = UIStoryboard(name: "SelectCategory", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "SelectCategoryViewController") as! SelectCategoryViewController
+        vc.viewSource = .normal
+        let navigationController = UINavigationController(rootViewController: vc)
+        
+        self.navigationController?.present(navigationController, animated: true)
+    }
+    
+    private func hideKeyBoardWhenTappedScreen() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc func tapHandler() {
+        keyboardWillHide.send()
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        keyboardWillHide.send()
+        return true
     }
     
     //        // viewdidload
@@ -168,32 +231,10 @@ class AddInfoViewController: UIViewController {
 }
 
 extension AddInfoViewController: UICollectionViewDelegate, UITextFieldDelegate, UIGestureRecognizerDelegate {
-    func hideKeyBoardWhenTappedScreen() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
-        tapGesture.cancelsTouchesInView = false
-        view.addGestureRecognizer(tapGesture)
-    }
-    
-    @objc func tapHandler() {
-        print("터치")
-        self.view.endEditing(true)
-    }
-    
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        print("return!")
-        self.view.endEditing(true)
-        return true
-    }
-    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let section = Section(rawValue: indexPath.section)
         if section == .button {
-            let storyboard = UIStoryboard(name: "SelectCategory", bundle: nil)
-            let vc = storyboard.instantiateViewController(withIdentifier: "SelectCategoryViewController") as! SelectCategoryViewController
-            let navigationController = UINavigationController(rootViewController: vc)
-            
-            self.navigationController?.present(navigationController, animated: true)
-            
+            didSelect.send()
         }
         collectionView.deselectItem(at: indexPath, animated: true)
     }

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 class HomeViewController: UIViewController {
     @IBOutlet weak var collectionView: UICollectionView!
@@ -28,11 +29,14 @@ class HomeViewController: UIViewController {
             }
         }
     }
-    
-    var categoryItems: [CategoryData] = CategoryData.list
-    var infoItems: [InfoData] = InfoData.list
     var selectedItems: Set<Item> = []
     var isSelectAll: Bool = false
+    
+    var subscriptions = Set<AnyCancellable>()
+    let didCategorySelect = PassthroughSubject<CategoryData, Never>()
+    let didInfoSelect = PassthroughSubject<Item, Never>()
+    @Published var categoryItems: [CategoryData] = CategoryData.list
+    @Published var infoItems: [InfoData] = InfoData.list
     
     var searchController: UISearchController!
     var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
@@ -44,6 +48,8 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        bind()
         configureNavigationItem()
         embedSearchControl()
         configureCollectionView()
@@ -52,6 +58,49 @@ class HomeViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         navigationController?.setToolbarHidden(true, animated: true)
+    }
+    
+    private func bind() {
+        didCategorySelect
+            .receive(on: RunLoop.main)
+            .sink { [weak self] selectedItem in
+                
+                print(">>> selected: \(selectedItem.title)")
+                
+                // toggle이 안되는데?
+                //                selectedItem.isSelected.toggle()
+                print(">>> selected: \(selectedItem.isSelected)")
+                
+                
+            }.store(in: &subscriptions)
+        
+        didInfoSelect
+            .receive(on: RunLoop.main)
+            .sink { [weak self] selectedItem in
+                guard let self = self else { return }
+                if self.isEditing {
+                    if self.selectedItems.contains(selectedItem) {
+                        self.selectedItems.remove(selectedItem)
+                    } else {
+                        self.selectedItems.insert(selectedItem)
+                    }
+                    self.updateSnapshot(item: selectedItem)
+                } else {
+                    print(">>> selected: \(selectedItem.title)")
+                    self.presentViewController(item: selectedItem)
+    
+                }
+            }.store(in: &subscriptions)
+        
+        Publishers.CombineLatest($categoryItems, $infoItems)
+            .receive(on: RunLoop.main)
+            .sink { [weak self] (categories, infos) in
+                guard let self = self else { return }
+                var items: [Section: [Item]] = [:]
+                items[.category] = categories.map { Item.categoryItem($0) }
+                items[.information] = infos.map { Item.informationItem($0) }
+                self.applySnapshot(items)
+            }.store(in: &subscriptions)
     }
     
     private func configureNavigationItem() {
@@ -72,7 +121,7 @@ class HomeViewController: UIViewController {
         navigationItem.leftBarButtonItem?.title = leftBarButtonCustom
         navigationItem.rightBarButtonItem = settingItem
         
-//        let items: [UIBarButtonItem] = isEditing ? editToolBarItem() : defaultToolBarItem()
+        //        let items: [UIBarButtonItem] = isEditing ? editToolBarItem() : defaultToolBarItem()
         let items: [UIBarButtonItem] = defaultToolBarItem()
         self.toolbarItems = items
     }
@@ -166,12 +215,12 @@ class HomeViewController: UIViewController {
         }
         collectionView.isEditing = editing
     }
-
+    
     @objc private func selectAllItems() {
         isSelectAll.toggle()
         if isSelectAll {
-//            selectedItems.insert()
-//            updateSnapshot(section: .information)
+            //            selectedItems.insert()
+            //            updateSnapshot(section: .information)
         } else {
             selectedItems.removeAll()
         }
@@ -240,8 +289,6 @@ class HomeViewController: UIViewController {
             }
         }
         
-        applySnapshot()
-        
         collectionView.collectionViewLayout = layout()
         collectionView?.contentInsetAdjustmentBehavior = .never
         collectionView.delegate = self
@@ -249,19 +296,20 @@ class HomeViewController: UIViewController {
         collectionView.keyboardDismissMode = .onDrag
     }
     
-    private func applySnapshot() {
+    private func applySnapshot(_ items: [Section: [Item]]) {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
         snapshot.appendSections(Section.allCases)
         snapshot.appendItems([CategoryData(title: "모두보기", isSelected: true)].map { Item.categoryItem($0) }, toSection: .category)
-        snapshot.appendItems(categoryItems.map { Item.categoryItem($0) }, toSection: .category)
-        snapshot.appendItems(infoItems.map{ Item.informationItem($0) }, toSection: .information)
+        for (section, item) in items {
+            snapshot.appendItems(item, toSection: section)
+        }
         dataSource.apply(snapshot)
     }
     
     private func updateSnapshot(item: Item) {
         var snapshot = dataSource.snapshot()
         snapshot.reloadItems([item])
-        dataSource.apply(snapshot)
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
     
     private func layout() -> UICollectionViewCompositionalLayout {
@@ -274,7 +322,7 @@ class HomeViewController: UIViewController {
                 let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
                 
                 let section = NSCollectionLayoutSection(group: group)
-                section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 0)
+                section.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 15, bottom: 0, trailing: 15)
                 section.interGroupSpacing = 10
                 section.orthogonalScrollingBehavior = .continuousGroupLeadingBoundary
                 
@@ -288,6 +336,15 @@ class HomeViewController: UIViewController {
             }
         }
     }
+    
+    private func presentViewController(item: Item) {
+        let storyboard = UIStoryboard(name: "DetailInfo", bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: "DetailInfoViewController") as! DetailInfoViewController
+        if case .informationItem(let infoData) = item {
+            vc.information = infoData
+        }
+        self.navigationController?.pushViewController(vc, animated: true)
+    }
 }
 
 extension HomeViewController: UICollectionViewDelegate, UISearchBarDelegate {
@@ -298,32 +355,11 @@ extension HomeViewController: UICollectionViewDelegate, UISearchBarDelegate {
                 print(">>> selected: 모두보기")
                 
             } else {
-                var item = categoryItems[indexPath.item - 1]
-                print(">>> selected: \(item.title)")
-                
-                // toggle이 안되는데?
-                item.isSelected.toggle()
-                print(">>> selected: \(item.isSelected)")
+                didCategorySelect.send(categoryItems[indexPath.item - 1])
             }
+            
         default:
-            if isEditing {
-                guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
-                
-                if selectedItems.contains(item) {
-                    selectedItems.remove(item)
-                } else {
-                    selectedItems.insert(item)
-                }
-                updateSnapshot(item: item)
-            } else {
-                let item = infoItems[indexPath.item]
-                print(">>> selected: \(item.title)")
-                
-                let storyboard = UIStoryboard(name: "DetailInfo", bundle: nil)
-                let vc = storyboard.instantiateViewController(withIdentifier: "DetailInfoViewController") as! DetailInfoViewController
-                vc.information = item
-                self.navigationController?.pushViewController(vc, animated: true)
-            }
+                didInfoSelect.send(Item.informationItem(infoItems[indexPath.item]))
         }
         collectionView.deselectItem(at: indexPath, animated: true)
     }

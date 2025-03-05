@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 import Kingfisher
 import SafariServices
 
@@ -15,8 +16,6 @@ class DetailInfoViewController: UIViewController {
     @IBOutlet weak var categoryLabel: UILabel!
     
     @IBOutlet weak var collectionView: UICollectionView!
-    
-    var information: InfoData = InfoData(title: "Unknown", description: "", urlString: "", imageURL: "", category: CategoryData(title: ""))
     
     enum Section: Int, CaseIterable {
         case url
@@ -29,19 +28,37 @@ class DetailInfoViewController: UIViewController {
             }
         }
     }
-    
     typealias Item = InfoData
+    @Published var information: InfoData = InfoData(title: "Unknown", description: "", urlString: "", imageURL: "", category: CategoryData(title: ""))
     
-    var infoItems: [InfoData] = InfoData.list
+    var subscriptions = Set<AnyCancellable>()
+    let didSelect = PassthroughSubject<URL, Never>()
     
     var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        bind()
         configureNavigationItem()
         configureCollectionView()
         updateUI()
         navigationController?.setToolbarHidden(true, animated: true)
+    }
+    
+    private func bind() {
+        didSelect
+            .receive(on: RunLoop.main)
+            .sink { [weak self] url in
+                let safari = SFSafariViewController(url: url)
+                self?.present(safari, animated: true)
+            }.store(in: &subscriptions)
+        
+        $information
+            .receive(on: RunLoop.main)
+            .sink { [weak self] data in
+                self?.applySnapshot(data)
+            }.store(in: &subscriptions)
     }
     
     private func configureNavigationItem() {
@@ -102,17 +119,15 @@ class DetailInfoViewController: UIViewController {
             return nil
         }
         
-        applySnapshot()
-        
         collectionView.collectionViewLayout = layout()
         collectionView.delegate = self
     }
     
-    private func applySnapshot() {
+    private func applySnapshot(_ items: InfoData) {
         var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
         snapshot.appendSections(Section.allCases)
-        snapshot.appendItems([InfoData(title: information.title, description: "", urlString: information.urlString, imageURL: "", category: CategoryData(title: ""))], toSection: .url)
-        snapshot.appendItems([InfoData(title: information.title, description: information.description, urlString: "", imageURL: "", category: CategoryData(title: ""))], toSection: .description)
+        snapshot.appendItems([InfoData(title: items.title, description: "", urlString: items.urlString, imageURL: "", category: CategoryData(title: ""))], toSection: .url)
+        snapshot.appendItems([InfoData(title: items.title, description: items.description, urlString: "", imageURL: "", category: CategoryData(title: ""))], toSection: .description)
         dataSource.apply(snapshot)
     }
     
@@ -140,9 +155,8 @@ extension DetailInfoViewController: UICollectionViewDelegate {
             guard let url = URL(string: information.urlString) else {
                 return
             }
-            
-            let safari = SFSafariViewController(url: url)
-            present(safari, animated: true)
+            didSelect.send(url)
         }
+        collectionView.deselectItem(at: indexPath, animated: true)
     }
 }
