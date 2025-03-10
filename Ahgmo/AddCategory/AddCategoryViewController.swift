@@ -87,7 +87,6 @@ class AddCategoryViewController: UIViewController {
         collectionView.keyboardDismissMode = .interactive
         collectionView.delegate = self
         
-        // Cell Registration 설정
         let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, indexPath, item in
             let textField = UITextField()
             textField.placeholder = item
@@ -105,7 +104,6 @@ class AddCategoryViewController: UIViewController {
             ])
         }
         
-        // DataSource 설정
         dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
         }

@@ -9,17 +9,11 @@ import UIKit
 import Combine
 
 class CategoryViewController: UIViewController {
-    enum Section {
-        case main
-    }
-    typealias Item = CategoryData
-    @Published var categoryItems: [CategoryData] = CategoryData.list
-    
     var subscriptions = Set<AnyCancellable>()
-    let didSelect = PassthroughSubject<CategoryData, Never>()
+    var viewModel: CategoryViewModel!
     
     var collectionView: UICollectionView!
-    var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
+    var dataSource: UICollectionViewDiffableDataSource<CategoryViewModel.Section, CategoryViewModel.Item>!
     var searchController: UISearchController!
     
     override func viewWillAppear(_ animated: Bool) {
@@ -29,7 +23,7 @@ class CategoryViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        viewModel = CategoryViewModel(categoryItems: CategoryData.list)
         bind()
         configureNavigationItem()
         embedSearchControl()
@@ -37,17 +31,18 @@ class CategoryViewController: UIViewController {
     }
 
     private func bind() {
-        didSelect
-            .receive(on: RunLoop.main)
-            .sink { [weak self] selectedItem in
-                self?.presentViewController(item: selectedItem)
-            }.store(in: &subscriptions)
-        
-        $categoryItems
+        viewModel.categoryItems
             .receive(on: RunLoop.main)
             .sink { [weak self] data in
                 self?.applySnapshot(data)
         }.store(in: &subscriptions)
+        
+        viewModel.selectedItem
+            .compactMap { $0 }
+            .receive(on: RunLoop.main)
+            .sink { [weak self] selectedItem in
+                self?.presentViewController(item: selectedItem)
+            }.store(in: &subscriptions)
     }
     
     private func configureNavigationItem() {
@@ -113,7 +108,7 @@ class CategoryViewController: UIViewController {
             collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
         
-        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, indexPath, item in
+        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, CategoryViewModel.Item> { cell, indexPath, item in
             var content = UIListContentConfiguration.cell()
             content.text = item.title
             cell.contentConfiguration = content
@@ -127,16 +122,16 @@ class CategoryViewController: UIViewController {
             cell.accessories = accessories
         }
         
-        dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
+        dataSource = UICollectionViewDiffableDataSource<CategoryViewModel.Section, CategoryViewModel.Item>(collectionView: collectionView) { collectionView, indexPath, item in
             collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
         }
     }
     
-    private func deleteItem(_ item: Item) {
+    private func deleteItem(_ item: CategoryViewModel.Item) {
         guard let indexPath = dataSource.indexPath(for: item) else {
             return
         }
-        categoryItems.remove(at: indexPath.item)
+////        viewModel.categoryItems.remove(at: indexPath.item)
         
         var snapshot = dataSource.snapshot()
         snapshot.deleteItems([item])
@@ -144,30 +139,29 @@ class CategoryViewController: UIViewController {
     }
     
     private func applySnapshot(_ items: [CategoryData]) {
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
+        var snapshot = NSDiffableDataSourceSnapshot<CategoryViewModel.Section, CategoryViewModel.Item>()
         snapshot.appendSections([.main])
         snapshot.appendItems(items, toSection: .main)
         dataSource.apply(snapshot)
     }
     
-    private func updateSnapshot(item: Item) {
+    private func updateSnapshot(item: CategoryViewModel.Item) {
         var snapshot = dataSource.snapshot()
         snapshot.reloadItems([item])
         dataSource.apply(snapshot)
     }
     
-    private func presentViewController(item: Item) {
+    private func presentViewController(item: CategoryViewModel.Item) {
         let storyboard = UIStoryboard(name: "EditCategory", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "EditCategoryViewController") as! EditCategoryViewController
-        vc.category = item
+        vc.viewModel = EditCategoryViewModel(categoryItems: item)
         self.navigationController?.pushViewController(vc, animated: true)
     }
 }
 
 extension CategoryViewController: UICollectionViewDelegate, UISearchBarDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let selectedItem = categoryItems[indexPath.item]
-        didSelect.send(selectedItem)
+        viewModel.didSelect(at: indexPath)
         collectionView.deselectItem(at: indexPath, animated: true)
     }
     

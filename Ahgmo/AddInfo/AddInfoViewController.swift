@@ -23,14 +23,13 @@ class AddInfoViewController: UIViewController {
     var subscriptions = Set<AnyCancellable>()
     let didSelect = PassthroughSubject<Void, Never>()
     let keyboardWillHide = PassthroughSubject<Void, Never>()
-    @Published var selectedCategory: CategoryData = CategoryData(title: "")
+    var selectedCategory: CategoryData = CategoryData(title: "")
     
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         bind()
         configureNavigationItem()
         setupCollectionView()
@@ -44,13 +43,6 @@ class AddInfoViewController: UIViewController {
             .sink { [weak self] _ in
                 self?.presentViewController()
             }.store(in: &subscriptions)
-        
-        $selectedCategory
-            .receive(on: RunLoop.main)
-            .sink { [weak self] category in
-                self?.updateSnapshot(section: .button)
-            }.store(in: &subscriptions)
-        
         
         keyboardWillHide
             .receive(on: RunLoop.main)
@@ -167,6 +159,10 @@ class AddInfoViewController: UIViewController {
         let storyboard = UIStoryboard(name: "SelectCategory", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "SelectCategoryViewController") as! SelectCategoryViewController
         vc.viewSource = .normal
+        vc.completion = { [weak self] category in
+            self?.selectedCategory = category
+            self?.updateSnapshot(section: .button)
+        }
         let navigationController = UINavigationController(rootViewController: vc)
         
         self.navigationController?.present(navigationController, animated: true)
@@ -231,11 +227,12 @@ class AddInfoViewController: UIViewController {
 }
 
 extension AddInfoViewController: UICollectionViewDelegate, UITextFieldDelegate, UIGestureRecognizerDelegate {
+    func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
+        return Section(rawValue: indexPath.section) == .button
+    }
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let section = Section(rawValue: indexPath.section)
-        if section == .button {
-            didSelect.send()
-        }
+        didSelect.send()
         collectionView.deselectItem(at: indexPath, animated: true)
     }
 }

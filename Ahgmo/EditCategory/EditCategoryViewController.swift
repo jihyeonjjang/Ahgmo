@@ -9,18 +9,12 @@ import UIKit
 import Combine
 
 class EditCategoryViewController: UIViewController {
-    enum Section {
-        case main
-    }
-    
-    typealias Item = CategoryData
-    @Published var category: CategoryData = CategoryData(title: "Unknown")
-    
     var subscriptions = Set<AnyCancellable>()
     let keyboardWillHide = PassthroughSubject<Void, Never>()
+    var viewModel: EditCategoryViewModel!
     
     var collectionView: UICollectionView!
-    var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
+    var dataSource: UICollectionViewDiffableDataSource<EditCategoryViewModel.Section, EditCategoryViewModel.Item>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,7 +32,7 @@ class EditCategoryViewController: UIViewController {
             }
             .store(in: &subscriptions)
         
-        $category
+        viewModel.categoryItems
             .receive(on: RunLoop.main)
             .sink { [weak self] data in
                 self?.applySnapshot(data)
@@ -74,11 +68,11 @@ class EditCategoryViewController: UIViewController {
         collectionView.keyboardDismissMode = .onDrag
         collectionView.delegate = self
         
-        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, indexPath, item in
+        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, EditCategoryViewModel.Item> { cell, indexPath, item in
             let textField = UITextField()
             textField.placeholder = "카테고리 이름"
             textField.clearButtonMode = .always
-            textField.text = self.category.title
+            textField.text = self.viewModel.categoryItems.value.title
             textField.frame = CGRect(x: 0, y: 0, width: cell.bounds.width, height: cell.bounds.height)
             textField.delegate = self
             
@@ -92,13 +86,13 @@ class EditCategoryViewController: UIViewController {
             ])
         }
         
-        dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
+        dataSource = UICollectionViewDiffableDataSource<EditCategoryViewModel.Section, EditCategoryViewModel.Item>(collectionView: collectionView) { collectionView, indexPath, item in
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
         }
     }
     
     private func applySnapshot(_ items: CategoryData) {
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
+        var snapshot = NSDiffableDataSourceSnapshot<EditCategoryViewModel.Section, EditCategoryViewModel.Item>()
         snapshot.appendSections([.main])
         snapshot.appendItems([CategoryData(title: items.title)], toSection: .main)
         dataSource.apply(snapshot, animatingDifferences: false)

@@ -10,50 +10,37 @@ import Combine
 import MessageUI
 
 class SettingViewController: UIViewController {
-    enum Section: Int, CaseIterable {
-        case sort
-        case service
-    }
-    
-    struct Item: Hashable {
-        enum ItemType {
-            case info
-            case category
-            case appInfo
-            case contact
-        }
-        
-        let title: String
-        let type: ItemType
-    }
-    
     var subscriptions = Set<AnyCancellable>()
-    let didSelect = PassthroughSubject<Item, Never>()
-    @Published var setData: [Section: [Item]] = [
-        .sort: [
-            Item(title: "정보", type: .info),
-            Item(title: "카테고리", type: .category)
-        ],
-        .service: [
-            Item(title: "앱정보", type: .appInfo),
-            Item(title: "문의하기", type: .contact)
-        ]
-    ]
-    var isSortedAscending: Bool = true
-    
+    var viewModel: SettingViewModel!
     var collectionView: UICollectionView!
-    var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
+    var dataSource: UICollectionViewDiffableDataSource<SettingViewModel.Section, SettingViewModel.Item>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        viewModel = SettingViewModel(setData:[
+            .sort: [
+                SettingViewModel.Item(title: "정보", type: .info),
+                SettingViewModel.Item(title: "카테고리", type: .category)
+            ],
+            .service: [
+                SettingViewModel.Item(title: "앱정보", type: .appInfo),
+                SettingViewModel.Item(title: "문의하기", type: .contact)
+            ]
+        ], isSortedAscending: false)
         bind()
         configureNavigationItem()
         configureCollectionView()
     }
     
     private func bind() {
-        didSelect
+        viewModel.setData
+            .receive(on: RunLoop.main)
+            .sink { [weak self] data in
+                self?.applySnapshot(data)
+            }.store(in: &subscriptions)
+        
+        viewModel.selectedItem
+            .compactMap { $0 }
             .receive(on: RunLoop.main)
             .sink { [weak self] selectedItem in
                 switch selectedItem.type {
@@ -64,12 +51,6 @@ class SettingViewController: UIViewController {
                 case .info, .category:
                     break
                 }
-            }.store(in: &subscriptions)
-        
-        $setData
-            .receive(on: RunLoop.main)
-            .sink { [weak self] data in
-                self?.applySnapshot(data)
             }.store(in: &subscriptions)
     }
     
@@ -88,8 +69,8 @@ class SettingViewController: UIViewController {
         view.addSubview(collectionView)
         collectionView.delegate = self
         
-        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, indexPath, item in
-            let section = Section(rawValue: indexPath.section)
+        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, SettingViewModel.Item> { cell, indexPath, item in
+            let section = SettingViewModel.Section(rawValue: indexPath.section)
             if section == .sort {
                 self.configureSortCell(cell: cell, item: item)
             } else {
@@ -97,12 +78,12 @@ class SettingViewController: UIViewController {
             }
         }
         
-        dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
+        dataSource = UICollectionViewDiffableDataSource<SettingViewModel.Section, SettingViewModel.Item>(collectionView: collectionView) { collectionView, indexPath, item in
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
         }
     }
     
-    private func configureSortCell(cell: UICollectionViewListCell, item: Item) {
+    private func configureSortCell(cell: UICollectionViewListCell, item: SettingViewModel.Item) {
         let titleLabel = UILabel()
         let sortTypeButton = UIButton()
         
@@ -130,18 +111,18 @@ class SettingViewController: UIViewController {
     }
     
     private func updateSortButtonTitle(_ button: UIButton) {
-        button.setTitle(self.isSortedAscending ? "오름차순" : "내림차순", for: .normal)
+        button.setTitle(viewModel.isSortedAscending.value ? "오름차순" : "내림차순", for: .normal)
     }
     
     private func updateMenuItems(_ button: UIButton) {
-        let ascendingAction = UIAction(title: "오름차순", state: isSortedAscending ? .on : .off) { [weak self] _ in
-            self?.isSortedAscending = true
+        let ascendingAction = UIAction(title: "오름차순", state: viewModel.isSortedAscending.value ? .on : .off) { [weak self] _ in
+            self?.viewModel.isSortedAscending.value = true
             self?.updateSortButtonTitle(button)
             self?.updateMenuItems(button)
         }
         
-        let descendingAction = UIAction(title: "내림차순", state: isSortedAscending ? .off : .on) { [weak self] _ in
-            self?.isSortedAscending = false
+        let descendingAction = UIAction(title: "내림차순", state: viewModel.isSortedAscending.value ? .off : .on) { [weak self] _ in
+            self?.viewModel.isSortedAscending.value = false
             self?.updateSortButtonTitle(button)
             self?.updateMenuItems(button)
         }
@@ -149,15 +130,15 @@ class SettingViewController: UIViewController {
         button.menu = UIMenu(title: "", children: [ascendingAction, descendingAction])
     }
     
-    private func configureServiceCell(cell: UICollectionViewListCell, item: Item) {
+    private func configureServiceCell(cell: UICollectionViewListCell, item: SettingViewModel.Item) {
         var content = cell.defaultContentConfiguration()
         content.text = item.title
         cell.contentConfiguration = content
     }
     
-    private func applySnapshot(_ items: [Section: [Item]]) {
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
-        snapshot.appendSections(Section.allCases)
+    private func applySnapshot(_ items: [SettingViewModel.Section: [SettingViewModel.Item]]) {
+        var snapshot = NSDiffableDataSourceSnapshot<SettingViewModel.Section, SettingViewModel.Item>()
+        snapshot.appendSections(SettingViewModel.Section.allCases)
         for (section, item) in items {
             snapshot.appendItems(item, toSection: section)
         }
@@ -187,7 +168,7 @@ class SettingViewController: UIViewController {
 
 extension SettingViewController: UICollectionViewDelegate, MFMailComposeViewControllerDelegate {
     func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
-        guard let section = Section(rawValue: indexPath.section) else { return false }
+        guard let section = SettingViewModel.Section(rawValue: indexPath.section) else { return false }
         if section == .sort {
             return false
         }
@@ -195,10 +176,7 @@ extension SettingViewController: UICollectionViewDelegate, MFMailComposeViewCont
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if let section = Section(rawValue: indexPath.section), let items = setData[section] {
-            let selectedItem = items[indexPath.row]
-            didSelect.send(selectedItem)
-        }
+        viewModel.didSelect(at: indexPath)
         collectionView.deselectItem(at: indexPath, animated: true)
     }
     

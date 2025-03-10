@@ -24,22 +24,18 @@ class SelectCategoryViewController: UIViewController {
         super.init(coder: coder)
     }
     
-    enum Section {
-        case main
-    }
-    typealias Item = CategoryData
-    
     var subscriptions = Set<AnyCancellable>()
-    let didSelect = PassthroughSubject<CategoryData, Never>()
-    @Published var categoryItems: [CategoryData] = CategoryData.list
+    var viewModel: SelectCategoryViewModel!
     
     var viewSource: ViewSource
     var collectionView: UICollectionView!
-    var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
+    var dataSource: UICollectionViewDiffableDataSource<SelectCategoryViewModel.Section, SelectCategoryViewModel.Item>!
+    
+    var completion: ((CategoryData) -> Void)?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        viewModel = SelectCategoryViewModel(categoryItems: CategoryData.list)
         bind()
         configureNavigationItem()
         embedSearchControl()
@@ -48,19 +44,18 @@ class SelectCategoryViewController: UIViewController {
     
     private func bind() {
         // input
-        didSelect
-            .receive(on: RunLoop.main)
-            .sink { item in
-                NotificationCenter.default.post(
-                    name: .didSelectCategory,
-                    object: item
-                )
-            }.store(in: &subscriptions)
-        
-        $categoryItems
+        viewModel.categoryItems
             .receive(on: RunLoop.main)
             .sink { [weak self] list in
                 self?.applySnapshot(list)
+            }.store(in: &subscriptions)
+        
+        viewModel.selectedItem
+            .compactMap { $0 }
+            .receive(on: RunLoop.main)
+            .sink { [weak self] item in
+                self?.completion?(item)
+                self?.dismiss(animated: true, completion: nil)
             }.store(in: &subscriptions)
     }
     
@@ -126,7 +121,7 @@ class SelectCategoryViewController: UIViewController {
             collectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
         
-        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { [weak self] cell, indexPath, item in
+        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, SelectCategoryViewModel.Item> { [weak self] cell, indexPath, item in
             guard let self = self else { return }
             
             var content = UIListContentConfiguration.cell()
@@ -142,13 +137,13 @@ class SelectCategoryViewController: UIViewController {
             }
         }
         
-        dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
+        dataSource = UICollectionViewDiffableDataSource<SelectCategoryViewModel.Section, SelectCategoryViewModel.Item>(collectionView: collectionView) { collectionView, indexPath, item in
             collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
         }
     }
     
     private func applySnapshot(_ items: [CategoryData]) {
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
+        var snapshot = NSDiffableDataSourceSnapshot<SelectCategoryViewModel.Section, SelectCategoryViewModel.Item>()
         snapshot.appendSections([.main])
         snapshot.appendItems(items, toSection: .main)
         dataSource.apply(snapshot)
@@ -158,9 +153,7 @@ class SelectCategoryViewController: UIViewController {
 extension SelectCategoryViewController: UICollectionViewDelegate, UISearchBarDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
-        if let selectedCategory = dataSource.itemIdentifier(for: indexPath) {
-            didSelect.send(selectedCategory)
-        }
+        viewModel.didSelect(at: indexPath)
         self.dismiss(animated: true)
     }
     

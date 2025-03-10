@@ -14,31 +14,15 @@ class DetailInfoViewController: UIViewController {
     @IBOutlet weak var thumbnailImageView: UIImageView!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var categoryLabel: UILabel!
-    
     @IBOutlet weak var collectionView: UICollectionView!
     
-    enum Section: Int, CaseIterable {
-        case url
-        case description
-        
-        var title: String {
-            switch self {
-            case .url: return "URL"
-            case .description: return "설명"
-            }
-        }
-    }
-    typealias Item = InfoData
-    @Published var information: InfoData = InfoData(title: "Unknown", description: "", urlString: "", imageURL: "", category: CategoryData(title: ""))
-    
     var subscriptions = Set<AnyCancellable>()
-    let didSelect = PassthroughSubject<URL, Never>()
+    var viewModel: DetailInfoViewModel!
     
-    var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
+    var dataSource: UICollectionViewDiffableDataSource<DetailInfoViewModel.Section, DetailInfoViewModel.Item>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         bind()
         configureNavigationItem()
         configureCollectionView()
@@ -47,17 +31,18 @@ class DetailInfoViewController: UIViewController {
     }
     
     private func bind() {
-        didSelect
+        viewModel.infoItems
+            .receive(on: RunLoop.main)
+            .sink { [weak self] data in
+                self?.applySnapshot(data)
+            }.store(in: &subscriptions)
+        
+        viewModel.selectedItem
+            .compactMap { $0 }
             .receive(on: RunLoop.main)
             .sink { [weak self] url in
                 let safari = SFSafariViewController(url: url)
                 self?.present(safari, animated: true)
-            }.store(in: &subscriptions)
-        
-        $information
-            .receive(on: RunLoop.main)
-            .sink { [weak self] data in
-                self?.applySnapshot(data)
             }.store(in: &subscriptions)
     }
     
@@ -83,23 +68,22 @@ class DetailInfoViewController: UIViewController {
     @objc private func navigateToPage(_ sender: UIBarButtonItem) {
         let storyboard = UIStoryboard(name: "EditInfo", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "EditInfoViewController") as! EditInfoViewController
-        vc.information = information
+        vc.viewModel = EditInfoViewModel(infoItems: self.viewModel.infoItems.value)
         let navigationController = UINavigationController(rootViewController: vc)
         self.navigationController?.present(navigationController, animated: true)
     }
     
     private func configureCollectionView() {
         let headerRegistration = UICollectionView.SupplementaryRegistration<UICollectionViewListCell>(elementKind: UICollectionView.elementKindSectionHeader) { cell, _, indexPath in
-            let section = Section.allCases[indexPath.section]
+            let section = DetailInfoViewModel.Section.allCases[indexPath.section]
             var content = UIListContentConfiguration.plainHeader()
             content.text = section.title
-            //            content.textProperties.font = .boldSystemFont(ofSize: 16)
             cell.contentConfiguration = content
         }
         
-        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, indexPath, item in
+        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, DetailInfoViewModel.Item> { cell, indexPath, item in
             var content = UIListContentConfiguration.cell()
-            let section = Section(rawValue: indexPath.section)
+            let section = DetailInfoViewModel.Section(rawValue: indexPath.section)
             if section == .url {
                 content.text = item.urlString
             } else {
@@ -108,7 +92,7 @@ class DetailInfoViewController: UIViewController {
             cell.contentConfiguration = content
         }
         
-        dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
+        dataSource = UICollectionViewDiffableDataSource<DetailInfoViewModel.Section, DetailInfoViewModel.Item>(collectionView: collectionView) { collectionView, indexPath, item in
             collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
         }
         
@@ -124,8 +108,8 @@ class DetailInfoViewController: UIViewController {
     }
     
     private func applySnapshot(_ items: InfoData) {
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
-        snapshot.appendSections(Section.allCases)
+        var snapshot = NSDiffableDataSourceSnapshot<DetailInfoViewModel.Section, DetailInfoViewModel.Item>()
+        snapshot.appendSections(DetailInfoViewModel.Section.allCases)
         snapshot.appendItems([InfoData(title: items.title, description: "", urlString: items.urlString, imageURL: "", category: CategoryData(title: ""))], toSection: .url)
         snapshot.appendItems([InfoData(title: items.title, description: items.description, urlString: "", imageURL: "", category: CategoryData(title: ""))], toSection: .description)
         dataSource.apply(snapshot)
@@ -133,12 +117,12 @@ class DetailInfoViewController: UIViewController {
     
     private func updateUI() {
         thumbnailImageView.kf.setImage(
-            with: URL(string: information.imageURL)!,
+            with: URL(string: self.viewModel.infoItems.value.imageURL)!,
             placeholder: UIImage(systemName: "hands.sparkles.fill"))
         thumbnailImageView.layer.cornerRadius = 20
         
-        titleLabel.text = information.title
-        categoryLabel.text = information.category.title
+        titleLabel.text = self.viewModel.infoItems.value.title
+        categoryLabel.text = self.viewModel.infoItems.value.category.title
     }
     
     private func layout() -> UICollectionViewCompositionalLayout {
@@ -150,13 +134,12 @@ class DetailInfoViewController: UIViewController {
 }
 
 extension DetailInfoViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
+        return DetailInfoViewModel.Section(rawValue: indexPath.section) == .url
+    }
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        if Section(rawValue: indexPath.section) == .url {
-            guard let url = URL(string: information.urlString) else {
-                return
-            }
-            didSelect.send(url)
-        }
+        viewModel.didSelect()
         collectionView.deselectItem(at: indexPath, animated: true)
     }
 }
