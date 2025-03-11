@@ -35,7 +35,7 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4ECB0D8F2D1417A300ADDA3C"
+               BlueprintIdentifier = "4E5D238D2D7FFD4900A6E532"
                BuildableName = "AhgmoTests.xctest"
                BlueprintName = "AhgmoTests"
                ReferencedContainer = "container:Ahgmo.xcodeproj">

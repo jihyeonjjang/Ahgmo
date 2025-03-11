@@ -12,7 +12,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		4ECB0D912D1417A300ADDA3C /* PBXContainerItemProxy */ = {
+		4E5D23922D7FFD4900A6E532 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 4ECB0D6F2D1417A100ADDA3C /* Project object */;
 			proxyType = 1;
@@ -29,33 +29,45 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4E5D238E2D7FFD4900A6E532 /* AhgmoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AhgmoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ECB0D772D1417A100ADDA3C /* Ahgmo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ahgmo.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		4ECB0D902D1417A300ADDA3C /* AhgmoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AhgmoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4ECB0D9A2D1417A300ADDA3C /* AhgmoUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AhgmoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		4ECB0DA22D1417A300ADDA3C /* Exceptions for "Ahgmo" folder in "Ahgmo" target */ = {
+		4E5D24652D8005D500A6E532 /* Exceptions for "Ahgmo" folder in "Ahgmo" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Ahgmo.xcdatamodeld,
 				Info.plist,
 			);
 			target = 4ECB0D762D1417A100ADDA3C /* Ahgmo */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		4ECB0D792D1417A100ADDA3C /* Ahgmo */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				4ECB0DA22D1417A300ADDA3C /* Exceptions for "Ahgmo" folder in "Ahgmo" target */,
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		4E5D24662D8005D500A6E532 /* Exceptions for "Ahgmo" folder in "Compile Sources" phase from "Ahgmo" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = 4ECB0D732D1417A100ADDA3C /* Sources */;
+			membershipExceptions = (
+				Ahgmo.xcdatamodeld,
 			);
-			path = Ahgmo;
-			sourceTree = "<group>";
 		};
-		4ECB0D932D1417A300ADDA3C /* AhgmoTests */ = {
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		4E5D238F2D7FFD4900A6E532 /* AhgmoTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = AhgmoTests;
+			sourceTree = "<group>";
+		};
+		4E5D243D2D8005D500A6E532 /* Ahgmo */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				4E5D24652D8005D500A6E532 /* Exceptions for "Ahgmo" folder in "Ahgmo" target */,
+				4E5D24662D8005D500A6E532 /* Exceptions for "Ahgmo" folder in "Compile Sources" phase from "Ahgmo" target */,
+			);
+			path = Ahgmo;
 			sourceTree = "<group>";
 		};
 		4ECB0D9D2D1417A300ADDA3C /* AhgmoUITests */ = {
@@ -66,19 +78,19 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		4E5D238B2D7FFD4900A6E532 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4ECB0D742D1417A100ADDA3C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				4E98773C2D5345BB00100854 /* Kingfisher in Frameworks */,
 				4E9877392D5345B400100854 /* SwiftSoup in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		4ECB0D8D2D1417A300ADDA3C /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,9 +107,9 @@
 		4ECB0D6E2D1417A100ADDA3C = {
 			isa = PBXGroup;
 			children = (
-				4ECB0D792D1417A100ADDA3C /* Ahgmo */,
-				4ECB0D932D1417A300ADDA3C /* AhgmoTests */,
+				4E5D243D2D8005D500A6E532 /* Ahgmo */,
 				4ECB0D9D2D1417A300ADDA3C /* AhgmoUITests */,
+				4E5D238F2D7FFD4900A6E532 /* AhgmoTests */,
 				4ECB0D782D1417A100ADDA3C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -106,8 +118,8 @@
 			isa = PBXGroup;
 			children = (
 				4ECB0D772D1417A100ADDA3C /* Ahgmo.app */,
-				4ECB0D902D1417A300ADDA3C /* AhgmoTests.xctest */,
 				4ECB0D9A2D1417A300ADDA3C /* AhgmoUITests.xctest */,
+				4E5D238E2D7FFD4900A6E532 /* AhgmoTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -115,6 +127,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		4E5D238D2D7FFD4900A6E532 /* AhgmoTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4E5D23942D7FFD4900A6E532 /* Build configuration list for PBXNativeTarget "AhgmoTests" */;
+			buildPhases = (
+				4E5D238A2D7FFD4900A6E532 /* Sources */,
+				4E5D238B2D7FFD4900A6E532 /* Frameworks */,
+				4E5D238C2D7FFD4900A6E532 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4E5D23932D7FFD4900A6E532 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				4E5D238F2D7FFD4900A6E532 /* AhgmoTests */,
+			);
+			name = AhgmoTests;
+			packageProductDependencies = (
+			);
+			productName = AhgmoTests;
+			productReference = 4E5D238E2D7FFD4900A6E532 /* AhgmoTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		4ECB0D762D1417A100ADDA3C /* Ahgmo */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4ECB0DA32D1417A300ADDA3C /* Build configuration list for PBXNativeTarget "Ahgmo" */;
@@ -128,44 +163,20 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				4ECB0D792D1417A100ADDA3C /* Ahgmo */,
+				4E5D243D2D8005D500A6E532 /* Ahgmo */,
 			);
 			name = Ahgmo;
 			productName = Ahgmo;
 			productReference = 4ECB0D772D1417A100ADDA3C /* Ahgmo.app */;
 			productType = "com.apple.product-type.application";
 		};
-		4ECB0D8F2D1417A300ADDA3C /* AhgmoTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 4ECB0DA82D1417A300ADDA3C /* Build configuration list for PBXNativeTarget "AhgmoTests" */;
-			buildPhases = (
-				8B52B953B873357356E630C6 /* [CP] Check Pods Manifest.lock */,
-				4ECB0D8C2D1417A300ADDA3C /* Sources */,
-				4ECB0D8D2D1417A300ADDA3C /* Frameworks */,
-				4ECB0D8E2D1417A300ADDA3C /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				4ECB0D922D1417A300ADDA3C /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				4ECB0D932D1417A300ADDA3C /* AhgmoTests */,
-			);
-			name = AhgmoTests;
-			productName = AhgmoTests;
-			productReference = 4ECB0D902D1417A300ADDA3C /* AhgmoTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 		4ECB0D992D1417A300ADDA3C /* AhgmoUITests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4ECB0DAB2D1417A300ADDA3C /* Build configuration list for PBXNativeTarget "AhgmoUITests" */;
 			buildPhases = (
-				5E24034871F306091E1A2CAE /* [CP] Check Pods Manifest.lock */,
 				4ECB0D962D1417A300ADDA3C /* Sources */,
 				4ECB0D972D1417A300ADDA3C /* Frameworks */,
 				4ECB0D982D1417A300ADDA3C /* Resources */,
-				2764F8037D84369FA278D593 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -187,15 +198,15 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1610;
+				LastSwiftUpdateCheck = 1620;
 				LastUpgradeCheck = 1610;
 				TargetAttributes = {
+					4E5D238D2D7FFD4900A6E532 = {
+						CreatedOnToolsVersion = 16.2;
+						TestTargetID = 4ECB0D762D1417A100ADDA3C;
+					};
 					4ECB0D762D1417A100ADDA3C = {
 						CreatedOnToolsVersion = 16.1;
-					};
-					4ECB0D8F2D1417A300ADDA3C = {
-						CreatedOnToolsVersion = 16.1;
-						TestTargetID = 4ECB0D762D1417A100ADDA3C;
 					};
 					4ECB0D992D1417A300ADDA3C = {
 						CreatedOnToolsVersion = 16.1;
@@ -222,21 +233,21 @@
 			projectRoot = "";
 			targets = (
 				4ECB0D762D1417A100ADDA3C /* Ahgmo */,
-				4ECB0D8F2D1417A300ADDA3C /* AhgmoTests */,
 				4ECB0D992D1417A300ADDA3C /* AhgmoUITests */,
+				4E5D238D2D7FFD4900A6E532 /* AhgmoTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		4ECB0D752D1417A100ADDA3C /* Resources */ = {
+		4E5D238C2D7FFD4900A6E532 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4ECB0D8E2D1417A300ADDA3C /* Resources */ = {
+		4ECB0D752D1417A100ADDA3C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -252,79 +263,15 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		2764F8037D84369FA278D593 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Ahgmo-AhgmoUITests/Pods-Ahgmo-AhgmoUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Ahgmo-AhgmoUITests/Pods-Ahgmo-AhgmoUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Ahgmo-AhgmoUITests/Pods-Ahgmo-AhgmoUITests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		5E24034871F306091E1A2CAE /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Ahgmo-AhgmoUITests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		8B52B953B873357356E630C6 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-AhgmoTests-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
-		4ECB0D732D1417A100ADDA3C /* Sources */ = {
+		4E5D238A2D7FFD4900A6E532 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4ECB0D8C2D1417A300ADDA3C /* Sources */ = {
+		4ECB0D732D1417A100ADDA3C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -341,10 +288,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		4ECB0D922D1417A300ADDA3C /* PBXTargetDependency */ = {
+		4E5D23932D7FFD4900A6E532 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4ECB0D762D1417A100ADDA3C /* Ahgmo */;
-			targetProxy = 4ECB0D912D1417A300ADDA3C /* PBXContainerItemProxy */;
+			targetProxy = 4E5D23922D7FFD4900A6E532 /* PBXContainerItemProxy */;
 		};
 		4ECB0D9C2D1417A300ADDA3C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -354,6 +301,44 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		4E5D23952D7FFD4900A6E532 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GZ4K7ZY7RX;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = jjh.AhgmoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ahgmo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ahgmo";
+			};
+			name = Debug;
+		};
+		4E5D23962D7FFD4900A6E532 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = GZ4K7ZY7RX;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = jjh.AhgmoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ahgmo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ahgmo";
+			};
+			name = Release;
+		};
 		4ECB0DA42D1417A300ADDA3C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -539,44 +524,6 @@
 			};
 			name = Release;
 		};
-		4ECB0DA92D1417A300ADDA3C /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = GZ4K7ZY7RX;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = jjh.AhgmoTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ahgmo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ahgmo";
-			};
-			name = Debug;
-		};
-		4ECB0DAA2D1417A300ADDA3C /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = GZ4K7ZY7RX;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.1;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = jjh.AhgmoTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ahgmo.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ahgmo";
-			};
-			name = Release;
-		};
 		4ECB0DAC2D1417A300ADDA3C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -614,6 +561,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		4E5D23942D7FFD4900A6E532 /* Build configuration list for PBXNativeTarget "AhgmoTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4E5D23952D7FFD4900A6E532 /* Debug */,
+				4E5D23962D7FFD4900A6E532 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		4ECB0D722D1417A100ADDA3C /* Build configuration list for PBXProject "Ahgmo" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -628,15 +584,6 @@
 			buildConfigurations = (
 				4ECB0DA42D1417A300ADDA3C /* Debug */,
 				4ECB0DA52D1417A300ADDA3C /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		4ECB0DA82D1417A300ADDA3C /* Build configuration list for PBXNativeTarget "AhgmoTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				4ECB0DA92D1417A300ADDA3C /* Debug */,
-				4ECB0DAA2D1417A300ADDA3C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
