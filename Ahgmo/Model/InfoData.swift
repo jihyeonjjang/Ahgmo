@@ -7,14 +7,22 @@
 
 import Foundation
 
-struct InfoData: Codable, Hashable {
-    
-//    let infoID: UUID
+struct InfoData: Codable, Hashable, Identifiable, Searchable {
+    let id: UUID
     var title: String
     var description: String
     var urlString: String
     var imageURL: String
     var category: CategoryData
+    
+    init(id: UUID = UUID(), title: String, description: String, urlString: String, imageURL: String, category: CategoryData) {
+        self.id = id
+        self.title = title
+        self.description = description
+        self.urlString = urlString
+        self.imageURL = imageURL
+        self.category = category
+    }
 }
 
 extension InfoData {
