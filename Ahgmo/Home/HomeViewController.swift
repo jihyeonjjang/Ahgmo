@@ -13,6 +13,9 @@ class HomeViewController: UIViewController {
     var subscriptions = Set<AnyCancellable>()
     var viewModel: HomeViewModel!
     
+    var filteredItems: [InfoData] = []
+    let searchManager = SearchManager()
+    
     var searchController: UISearchController!
     var dataSource: UICollectionViewDiffableDataSource<HomeViewModel.Section, HomeViewModel.Item>!
     
@@ -51,7 +54,7 @@ class HomeViewController: UIViewController {
             .receive(on: RunLoop.main)
             .sink { selectedItem in
                 print(">>> selected: \(selectedItem.title)")
-//                selectedItem.isSelected.toggle()
+                //                selectedItem.isSelected.toggle()
                 print(">>> selected: \(selectedItem.isSelected)")
             }.store(in: &subscriptions)
         
@@ -63,7 +66,7 @@ class HomeViewController: UIViewController {
                 if self.isEditing {
                     self.viewModel.toggleItemSelection(selectedItem, isEditing: true)
                     if case let .informationItem(info) = HomeViewModel.Item.informationItem(selectedItem) {
-                        self.updateSnapshot(item: .informationItem(info))
+                        self.updateSnapshot(item: [.informationItem(info)])
                     }
                 } else {
                     print(">>> selected: \(selectedItem.title)")
@@ -96,7 +99,6 @@ class HomeViewController: UIViewController {
         navigationItem.leftBarButtonItem?.title = leftBarButtonCustom
         navigationItem.rightBarButtonItem = settingItem
         
-        //        let items: [UIBarButtonItem] = isEditing ? editToolBarItem() : defaultToolBarItem()
         let items: [UIBarButtonItem] = defaultToolBarItem()
         self.toolbarItems = items
     }
@@ -268,13 +270,21 @@ class HomeViewController: UIViewController {
         for (section, item) in items {
             snapshot.appendItems(item, toSection: section)
         }
-        dataSource.apply(snapshot)
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
     
-    private func updateSnapshot(item: HomeViewModel.Item) {
+    private func updateSnapshot(item: [HomeViewModel.Item]) {
         var snapshot = dataSource.snapshot()
-        snapshot.reloadItems([item])
+        snapshot.reloadItems(item)
         dataSource.apply(snapshot, animatingDifferences: false)
+    }
+    
+    private func applySearchSnapshot(searchItems: [HomeViewModel.Item]) {
+        var snapshot = dataSource.snapshot()
+        let existingItems = snapshot.itemIdentifiers(inSection: .information)
+        snapshot.deleteItems(existingItems)
+        snapshot.appendItems(searchItems, toSection: .information)
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
     
     private func layout() -> UICollectionViewCompositionalLayout {
@@ -319,23 +329,35 @@ extension HomeViewController: UICollectionViewDelegate, UISearchBarDelegate {
             if indexPath.item == 0 {
                 print(">>> selected: 모두보기")
             } else {
-                viewModel.didCategorySelect(at: indexPath)
+                if let item = dataSource.itemIdentifier(for: indexPath) {
+                    viewModel.didCategorySelect(id: item.id)
+                }
             }
         case .information:
-            viewModel.didInfoSelect(at: indexPath)
+            if let item = dataSource.itemIdentifier(for: indexPath) {
+                viewModel.didInfoSelect(id: item.id)
+            }
         case .none:
             break
         }
         collectionView.deselectItem(at: indexPath, animated: true)
     }
     
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        filteredItems = searchManager.filterItems(viewModel.infoItems.value, with: searchText)
+        let filteredHomeItems = filteredItems.map { HomeViewModel.Item.informationItem($0) }
+        applySearchSnapshot(searchItems: filteredHomeItems)
+    }
+    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.endEditing(true)
-        guard let keyword = searchBar.text, !keyword.isEmpty else { return }
-        print("\(keyword)")
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        collectionView.reloadData()
+        filteredItems = viewModel.infoItems.value
+        var items: [HomeViewModel.Section: [HomeViewModel.Item]] = [:]
+        items[.category] = viewModel.categoryItems.value.map { HomeViewModel.Item.categoryItem($0) }
+        items[.information] = viewModel.infoItems.value.map { HomeViewModel.Item.informationItem($0) }
+        applySnapshot(items)
     }
 }

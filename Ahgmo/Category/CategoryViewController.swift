@@ -12,6 +12,9 @@ class CategoryViewController: UIViewController {
     var subscriptions = Set<AnyCancellable>()
     var viewModel: CategoryViewModel!
     
+    var filteredItems: [CategoryData] = []
+    let searchManager = SearchManager()
+    
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<CategoryViewModel.Section, CategoryViewModel.Item>!
     var searchController: UISearchController!
@@ -138,7 +141,7 @@ class CategoryViewController: UIViewController {
         dataSource.apply(snapshot, animatingDifferences: true)
     }
     
-    private func applySnapshot(_ items: [CategoryData]) {
+    private func applySnapshot(_ items: [CategoryViewModel.Item]) {
         var snapshot = NSDiffableDataSourceSnapshot<CategoryViewModel.Section, CategoryViewModel.Item>()
         snapshot.appendSections([.main])
         snapshot.appendItems(items, toSection: .main)
@@ -151,6 +154,14 @@ class CategoryViewController: UIViewController {
         dataSource.apply(snapshot)
     }
     
+    private func applySearchSnapshot(searchItems: [CategoryViewModel.Item]) {
+        var snapshot = dataSource.snapshot()
+        let existingItems = snapshot.itemIdentifiers(inSection: .main)
+        snapshot.deleteItems(existingItems)
+        snapshot.appendItems(searchItems, toSection: .main)
+        dataSource.apply(snapshot, animatingDifferences: true)
+    }
+    
     private func presentViewController(item: CategoryViewModel.Item) {
         let storyboard = UIStoryboard(name: "EditCategory", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "EditCategoryViewController") as! EditCategoryViewController
@@ -161,17 +172,23 @@ class CategoryViewController: UIViewController {
 
 extension CategoryViewController: UICollectionViewDelegate, UISearchBarDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        viewModel.didSelect(at: indexPath)
+        if let item = dataSource.itemIdentifier(for: indexPath) {
+            viewModel.didSelect(id: item.id)
+        }
         collectionView.deselectItem(at: indexPath, animated: true)
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        filteredItems = searchManager.filterItems(viewModel.categoryItems.value, with: searchText)
+        applySearchSnapshot(searchItems: filteredItems)
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchBar.endEditing(true)
-        guard let keyword = searchBar.text, !keyword.isEmpty else { return }
-        print("\(keyword)")
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        collectionView.reloadData()
+        filteredItems = viewModel.categoryItems.value
+        applySnapshot(viewModel.categoryItems.value)
     }
 }

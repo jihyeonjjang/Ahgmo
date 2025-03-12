@@ -25,4 +25,10 @@ final class SelectCategoryViewModel {
     func didSelect(at indexPath: IndexPath) {
         selectedItem.send(categoryItems.value[indexPath.item])
     }
+    
+    func didSelect(id: UUID) {
+        if let category = categoryItems.value.first(where: { $0.id == id }) {
+            selectedItem.send(category)
+        }
+    }
 }

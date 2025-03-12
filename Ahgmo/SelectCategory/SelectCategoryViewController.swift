@@ -27,6 +27,9 @@ class SelectCategoryViewController: UIViewController {
     var subscriptions = Set<AnyCancellable>()
     var viewModel: SelectCategoryViewModel!
     
+    var filteredItems: [CategoryData] = []
+    let searchManager = SearchManager()
+    
     var viewSource: ViewSource
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<SelectCategoryViewModel.Section, SelectCategoryViewModel.Item>!
@@ -148,18 +151,37 @@ class SelectCategoryViewController: UIViewController {
         snapshot.appendItems(items, toSection: .main)
         dataSource.apply(snapshot)
     }
+    
+    private func applySearchSnapshot(searchItems: [SelectCategoryViewModel.Item]) {
+        var snapshot = dataSource.snapshot()
+        let existingItems = snapshot.itemIdentifiers(inSection: .main)
+        snapshot.deleteItems(existingItems)
+        snapshot.appendItems(searchItems, toSection: .main)
+        dataSource.apply(snapshot, animatingDifferences: true)
+    }
 }
 
 extension SelectCategoryViewController: UICollectionViewDelegate, UISearchBarDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
-        viewModel.didSelect(at: indexPath)
+        if let item = dataSource.itemIdentifier(for: indexPath) {
+            viewModel.didSelect(id: item.id)
+        }
         self.dismiss(animated: true)
     }
     
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        filteredItems = searchManager.filterItems(viewModel.categoryItems.value, with: searchText)
+        applySearchSnapshot(searchItems: filteredItems)
+    }
+    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        guard let keyword = searchBar.text, !keyword.isEmpty else { return }
-        
+        searchBar.endEditing(true)
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        filteredItems = viewModel.categoryItems.value
+        applySnapshot(viewModel.categoryItems.value)
     }
 }
 

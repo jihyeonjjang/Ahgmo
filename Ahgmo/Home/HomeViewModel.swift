@@ -44,15 +44,29 @@ final class HomeViewModel {
                 return data.title
             }
         }
+        
+        var id: UUID {
+            switch self {
+            case .categoryItem(let data):
+                return data.id
+            case .informationItem(let data):
+                return data.id
+            }
+        }
     }
     
-    func didCategorySelect(at indexPath: IndexPath) {
-        selectedCategory.send(categoryItems.value[indexPath.item - 1])
+    func didCategorySelect(id: UUID) {
+        if let category = categoryItems.value.first(where: { $0.id == id }) {
+            selectedCategory.send(category)
+        }
     }
     
-    func didInfoSelect(at indexPath: IndexPath) {
-        let selectedInfo = infoItems.value[indexPath.item]
-        self.selectedInfo.send(selectedInfo)
+    func didInfoSelect(id: UUID) {
+        if let info = infoItems.value.first(where: { $0.id == id }) {
+            selectedInfo.send(info)
+        }
+//        let selectedInfo = infoItems.value[indexPath.item]
+//        self.selectedInfo.send(selectedInfo)
     }
     
     func toggleItemSelection(_ item: InfoData, isEditing: Bool) {
