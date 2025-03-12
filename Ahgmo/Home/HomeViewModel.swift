@@ -11,16 +11,16 @@ import Combine
 final class HomeViewModel {
     let categoryItems: CurrentValueSubject<[CategoryData], Never>
     let infoItems: CurrentValueSubject<[InfoData], Never>
+    var filteredItems: CurrentValueSubject<[InfoData], Never>
+    var selectedCategory: CurrentValueSubject<CategoryData?, Never>
+    var selectedInfo: CurrentValueSubject<InfoData?, Never>
+    var selectedItems: CurrentValueSubject<Set<InfoData>, Never>
+    var isSelectAll: CurrentValueSubject<Bool, Never>
     
-    let selectedCategory: CurrentValueSubject<CategoryData?, Never>
-    let selectedInfo: CurrentValueSubject<InfoData?, Never>
-    
-    let selectedItems: CurrentValueSubject<Set<InfoData>, Never>
-    let isSelectAll: CurrentValueSubject<Bool, Never>
-    
-    init(categoryItems: [CategoryData], infoItems: [InfoData], selectedCategory: CategoryData? = nil, selectedInfo: InfoData? = nil) {
+    init(categoryItems: [CategoryData], infoItems: [InfoData], filteredItems: [InfoData], selectedCategory: CategoryData? = nil, selectedInfo: InfoData? = nil) {
         self.categoryItems = CurrentValueSubject(categoryItems)
         self.infoItems = CurrentValueSubject(infoItems)
+        self.filteredItems = CurrentValueSubject(filteredItems)
         self.selectedCategory = CurrentValueSubject(selectedCategory)
         self.selectedInfo = CurrentValueSubject(selectedInfo)
         self.selectedItems = CurrentValueSubject([])
@@ -56,8 +56,22 @@ final class HomeViewModel {
     }
     
     func didCategorySelect(id: UUID) {
-        if let category = categoryItems.value.first(where: { $0.id == id }) {
-            selectedCategory.send(category)
+        if let categoryIndex = categoryItems.value.firstIndex(where: { $0.id == id }) {
+            categoryItems.value[categoryIndex].isSelected.toggle()
+            categoryItems.value.indices
+                .filter { $0 != categoryIndex }
+                .forEach { categoryItems.value[$0].isSelected = false }
+            
+            if !categoryItems.value[categoryIndex].isSelected {
+                selectedCategory.send(nil)
+                filteredItems.send(infoItems.value)
+            } else {
+                let selectedCategory = categoryItems.value[categoryIndex]
+                self.selectedCategory.send(selectedCategory)
+                
+                let filteredInfos = infoItems.value.filter { $0.category.title == selectedCategory.title }
+                filteredItems.send(filteredInfos)
+            }
         }
     }
     
@@ -65,8 +79,8 @@ final class HomeViewModel {
         if let info = infoItems.value.first(where: { $0.id == id }) {
             selectedInfo.send(info)
         }
-//        let selectedInfo = infoItems.value[indexPath.item]
-//        self.selectedInfo.send(selectedInfo)
+        //        let selectedInfo = infoItems.value[indexPath.item]
+        //        self.selectedInfo.send(selectedInfo)
     }
     
     func toggleItemSelection(_ item: InfoData, isEditing: Bool) {

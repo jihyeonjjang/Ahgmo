@@ -12,10 +12,7 @@ class HomeViewController: UIViewController {
     @IBOutlet weak var collectionView: UICollectionView!
     var subscriptions = Set<AnyCancellable>()
     var viewModel: HomeViewModel!
-    
-    var filteredItems: [InfoData] = []
     let searchManager = SearchManager()
-    
     var searchController: UISearchController!
     var dataSource: UICollectionViewDiffableDataSource<HomeViewModel.Section, HomeViewModel.Item>!
     
@@ -26,7 +23,7 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel = HomeViewModel(categoryItems: CategoryData.list, infoItems: InfoData.list)
+        viewModel = HomeViewModel(categoryItems: CategoryData.list, infoItems: InfoData.list, filteredItems: InfoData.list)
         bind()
         configureNavigationItem()
         embedSearchControl()
@@ -52,10 +49,10 @@ class HomeViewController: UIViewController {
         viewModel.selectedCategory
             .compactMap { $0 }
             .receive(on: RunLoop.main)
-            .sink { selectedItem in
-                print(">>> selected: \(selectedItem.title)")
-                //                selectedItem.isSelected.toggle()
-                print(">>> selected: \(selectedItem.isSelected)")
+            .sink { [weak self] selectedItem in
+                guard let self = self else { return }
+                let categoryItems = self.dataSource.snapshot().itemIdentifiers(inSection: .category)
+                self.updateSnapshot(item: categoryItems)
             }.store(in: &subscriptions)
         
         viewModel.selectedInfo
@@ -78,6 +75,14 @@ class HomeViewController: UIViewController {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.toolbarItems = self?.isEditing ?? false ? self?.editToolBarItem() : self?.defaultToolBarItem()
+            }.store(in: &subscriptions)
+        
+        viewModel.filteredItems
+            .receive(on: RunLoop.main)
+            .sink { [weak self] items in
+                guard let self = self else { return }
+                let filteredHomeItems = items.map { HomeViewModel.Item.informationItem($0) }
+                self.applySearchSnapshot(searchItems: filteredHomeItems)
             }.store(in: &subscriptions)
     }
     
@@ -266,7 +271,6 @@ class HomeViewController: UIViewController {
     private func applySnapshot(_ items: [HomeViewModel.Section: [HomeViewModel.Item]]) {
         var snapshot = NSDiffableDataSourceSnapshot<HomeViewModel.Section, HomeViewModel.Item>()
         snapshot.appendSections(HomeViewModel.Section.allCases)
-        snapshot.appendItems([CategoryData(title: "모두보기", isSelected: true)].map { HomeViewModel.Item.categoryItem($0) }, toSection: .category)
         for (section, item) in items {
             snapshot.appendItems(item, toSection: section)
         }
@@ -326,13 +330,9 @@ extension HomeViewController: UICollectionViewDelegate, UISearchBarDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         switch HomeViewModel.Section(rawValue: indexPath.section) {
         case .category:
-            if indexPath.item == 0 {
-                print(">>> selected: 모두보기")
-            } else {
                 if let item = dataSource.itemIdentifier(for: indexPath) {
                     viewModel.didCategorySelect(id: item.id)
                 }
-            }
         case .information:
             if let item = dataSource.itemIdentifier(for: indexPath) {
                 viewModel.didInfoSelect(id: item.id)
@@ -344,9 +344,19 @@ extension HomeViewController: UICollectionViewDelegate, UISearchBarDelegate {
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        filteredItems = searchManager.filterItems(viewModel.infoItems.value, with: searchText)
-        let filteredHomeItems = filteredItems.map { HomeViewModel.Item.informationItem($0) }
+        viewModel.filteredItems.value = searchManager.filterItems(viewModel.infoItems.value, with: searchText)
+        let filteredHomeItems = viewModel.filteredItems.value.map { HomeViewModel.Item.informationItem($0) }
         applySearchSnapshot(searchItems: filteredHomeItems)
+    }
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        viewModel.filteredItems.value = viewModel.infoItems.value
+        viewModel.categoryItems.value.indices
+            .forEach { viewModel.categoryItems.value[$0].isSelected = false }
+        var items: [HomeViewModel.Section: [HomeViewModel.Item]] = [:]
+        items[.category] = viewModel.categoryItems.value.map { HomeViewModel.Item.categoryItem($0) }
+        items[.information] = viewModel.infoItems.value.map { HomeViewModel.Item.informationItem($0) }
+        applySnapshot(items)
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
@@ -354,7 +364,7 @@ extension HomeViewController: UICollectionViewDelegate, UISearchBarDelegate {
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        filteredItems = viewModel.infoItems.value
+        viewModel.filteredItems.value = viewModel.infoItems.value
         var items: [HomeViewModel.Section: [HomeViewModel.Item]] = [:]
         items[.category] = viewModel.categoryItems.value.map { HomeViewModel.Item.categoryItem($0) }
         items[.information] = viewModel.infoItems.value.map { HomeViewModel.Item.informationItem($0) }
