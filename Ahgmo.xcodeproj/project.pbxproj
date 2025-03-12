@@ -38,22 +38,11 @@
 		4E5D24652D8005D500A6E532 /* Exceptions for "Ahgmo" folder in "Ahgmo" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Ahgmo.xcdatamodeld,
 				Info.plist,
 			);
 			target = 4ECB0D762D1417A100ADDA3C /* Ahgmo */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		4E5D24662D8005D500A6E532 /* Exceptions for "Ahgmo" folder in "Compile Sources" phase from "Ahgmo" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = 4ECB0D732D1417A100ADDA3C /* Sources */;
-			membershipExceptions = (
-				Ahgmo.xcdatamodeld,
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		4E5D238F2D7FFD4900A6E532 /* AhgmoTests */ = {
@@ -65,7 +54,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				4E5D24652D8005D500A6E532 /* Exceptions for "Ahgmo" folder in "Ahgmo" target */,
-				4E5D24662D8005D500A6E532 /* Exceptions for "Ahgmo" folder in "Compile Sources" phase from "Ahgmo" target */,
 			);
 			path = Ahgmo;
 			sourceTree = "<group>";
