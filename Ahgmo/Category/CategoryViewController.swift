@@ -32,13 +32,13 @@ class CategoryViewController: UIViewController {
         embedSearchControl()
         configureCollectionView()
     }
-
+    
     private func bind() {
         viewModel.categoryItems
             .receive(on: RunLoop.main)
             .sink { [weak self] data in
                 self?.applySnapshot(data)
-        }.store(in: &subscriptions)
+            }.store(in: &subscriptions)
         
         viewModel.selectedItem
             .compactMap { $0 }
@@ -131,14 +131,26 @@ class CategoryViewController: UIViewController {
     }
     
     private func deleteItem(_ item: CategoryViewModel.Item) {
-        guard let indexPath = dataSource.indexPath(for: item) else {
-            return
-        }
-////        viewModel.categoryItems.remove(at: indexPath.item)
+        let actionSheet = UIAlertController(title: nil, message: "선택한 항목이 영구적으로 삭제됩니다.", preferredStyle: .actionSheet)
         
-        var snapshot = dataSource.snapshot()
-        snapshot.deleteItems([item])
-        dataSource.apply(snapshot, animatingDifferences: true)
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        let deleteAction = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+            if let indexPath = self?.dataSource.indexPath(for: item),
+               let item = self?.dataSource.itemIdentifier(for: indexPath) {
+                self?.viewModel.deleteItem(id: item.id)
+            }
+            self?.isEditing = false
+            // UI 업데이트
+        }
+        
+        actionSheet.addAction(deleteAction)
+        actionSheet.addAction(cancelAction)
+        
+        present(actionSheet, animated: true, completion: nil)
+        
+//        var snapshot = dataSource.snapshot()
+//        snapshot.deleteItems([item])
+//        dataSource.apply(snapshot, animatingDifferences: true)
     }
     
     private func applySnapshot(_ items: [CategoryViewModel.Item]) {

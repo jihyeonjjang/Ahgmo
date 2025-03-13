@@ -36,4 +36,8 @@ final class DetailInfoViewModel {
         }
         selectedItem.send(url)
     }
+    
+    func deleteItem() {
+        // 삭제
+    }
 }

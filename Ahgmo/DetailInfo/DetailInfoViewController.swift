@@ -52,7 +52,7 @@ class DetailInfoViewController: UIViewController {
             image: UIImage(systemName: "trash"),
             style: .plain,
             target: self,
-            action: nil
+            action: #selector(deleteItem)
         )
         
         let editItem = UIBarButtonItem(
@@ -71,6 +71,21 @@ class DetailInfoViewController: UIViewController {
         vc.viewModel = EditInfoViewModel(infoItems: self.viewModel.infoItems.value)
         let navigationController = UINavigationController(rootViewController: vc)
         self.navigationController?.present(navigationController, animated: true)
+    }
+    
+    @objc private func deleteItem() {
+        let actionSheet = UIAlertController(title: nil, message: "선택한 항목이 영구적으로 삭제됩니다.", preferredStyle: .actionSheet)
+        
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        let deleteAction = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+            self?.viewModel.deleteItem()
+            // UI 업데이트
+        }
+        
+        actionSheet.addAction(deleteAction)
+        actionSheet.addAction(cancelAction)
+        
+        present(actionSheet, animated: true, completion: nil)
     }
     
     private func configureCollectionView() {

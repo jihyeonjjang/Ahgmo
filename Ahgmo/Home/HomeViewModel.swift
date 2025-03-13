@@ -97,6 +97,10 @@ final class HomeViewModel {
         }
     }
     
+    func deleteItems() {
+        // 삭제
+    }
+    
     func clearSelection() {
         selectedItems.send([])
         isSelectAll.send(false)

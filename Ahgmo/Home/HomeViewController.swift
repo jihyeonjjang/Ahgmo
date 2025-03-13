@@ -45,7 +45,7 @@ class HomeViewController: UIViewController {
                 items[.information] = infos.map { HomeViewModel.Item.informationItem($0) }
                 self.applySnapshot(items)
             }.store(in: &subscriptions)
-
+        
         viewModel.selectedInfo
             .compactMap { $0 }
             .receive(on: RunLoop.main)
@@ -146,6 +146,11 @@ class HomeViewController: UIViewController {
             target: self,
             action: #selector(deleteSelectedItems)
         )
+        if viewModel.selectedItemsCount > 0 {
+            deleteItem.isEnabled = true
+        } else {
+            deleteItem.isEnabled = false
+        }
         
         let editToolBarItems = [selectAllButton, flexibleSpace, numberSelectLabel, flexibleSpace, deleteItem]
         return editToolBarItems
@@ -173,6 +178,7 @@ class HomeViewController: UIViewController {
         
         if !isEditing {
             viewModel.clearSelection()
+            // applySnapshot이 되어야할듯
             collectionView.reloadData()
         }
         collectionView.isEditing = editing
@@ -183,7 +189,20 @@ class HomeViewController: UIViewController {
     }
     
     @objc private func deleteSelectedItems() {
+        let actionSheet = UIAlertController(title: nil, message: "선택한 항목이 영구적으로 삭제됩니다.", preferredStyle: .actionSheet)
         
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        let deleteAction = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
+            self?.viewModel.deleteItems()
+            self?.isEditing = false
+            
+            // UI 업데이트
+        }
+        
+        actionSheet.addAction(deleteAction)
+        actionSheet.addAction(cancelAction)
+        
+        present(actionSheet, animated: true, completion: nil)
     }
     
     private func embedSearchControl() {

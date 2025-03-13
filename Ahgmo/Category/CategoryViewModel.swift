@@ -27,4 +27,9 @@ final class CategoryViewModel {
             selectedItem.send(category)
         }
     }
+    
+    func deleteItem(id: UUID) {
+        // 삭제
+        //        viewModel.categoryItems.remove(at: indexPath.item)
+    }
 }
