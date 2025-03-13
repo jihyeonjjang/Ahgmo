@@ -12,16 +12,14 @@ final class HomeViewModel {
     let categoryItems: CurrentValueSubject<[CategoryData], Never>
     let infoItems: CurrentValueSubject<[InfoData], Never>
     var filteredItems: CurrentValueSubject<[InfoData], Never>
-    var selectedCategory: CurrentValueSubject<CategoryData?, Never>
     var selectedInfo: CurrentValueSubject<InfoData?, Never>
     var selectedItems: CurrentValueSubject<Set<InfoData>, Never>
     var isSelectAll: CurrentValueSubject<Bool, Never>
     
-    init(categoryItems: [CategoryData], infoItems: [InfoData], filteredItems: [InfoData], selectedCategory: CategoryData? = nil, selectedInfo: InfoData? = nil) {
+    init(categoryItems: [CategoryData], infoItems: [InfoData], filteredItems: [InfoData], selectedInfo: InfoData? = nil) {
         self.categoryItems = CurrentValueSubject(categoryItems)
         self.infoItems = CurrentValueSubject(infoItems)
         self.filteredItems = CurrentValueSubject(filteredItems)
-        self.selectedCategory = CurrentValueSubject(selectedCategory)
         self.selectedInfo = CurrentValueSubject(selectedInfo)
         self.selectedItems = CurrentValueSubject([])
         self.isSelectAll = CurrentValueSubject(false)
@@ -61,14 +59,10 @@ final class HomeViewModel {
             categoryItems.value.indices
                 .filter { $0 != categoryIndex }
                 .forEach { categoryItems.value[$0].isSelected = false }
-            
             if !categoryItems.value[categoryIndex].isSelected {
-                selectedCategory.send(nil)
                 filteredItems.send(infoItems.value)
             } else {
                 let selectedCategory = categoryItems.value[categoryIndex]
-                self.selectedCategory.send(selectedCategory)
-                
                 let filteredInfos = infoItems.value.filter { $0.category.title == selectedCategory.title }
                 filteredItems.send(filteredInfos)
             }
@@ -79,22 +73,16 @@ final class HomeViewModel {
         if let info = infoItems.value.first(where: { $0.id == id }) {
             selectedInfo.send(info)
         }
-        //        let selectedInfo = infoItems.value[indexPath.item]
-        //        self.selectedInfo.send(selectedInfo)
     }
     
-    func toggleItemSelection(_ item: InfoData, isEditing: Bool) {
-        if isEditing {
-            var currentItems = selectedItems.value
-            if currentItems.contains(item) {
-                currentItems.remove(item)
-            } else {
-                currentItems.insert(item)
-            }
-            selectedItems.send(currentItems)
+    func toggleItemSelection(_ item: InfoData) {
+        var currentItems = selectedItems.value
+        if currentItems.contains(item) {
+            currentItems.remove(item)
         } else {
-            selectedInfo.send(item)
+            currentItems.insert(item)
         }
+        selectedItems.send(currentItems)
     }
     
     func toggleSelectAll() {

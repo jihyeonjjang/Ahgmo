@@ -45,28 +45,15 @@ class HomeViewController: UIViewController {
                 items[.information] = infos.map { HomeViewModel.Item.informationItem($0) }
                 self.applySnapshot(items)
             }.store(in: &subscriptions)
-        
-        viewModel.selectedCategory
-            .compactMap { $0 }
-            .receive(on: RunLoop.main)
-            .sink { [weak self] selectedItem in
-                guard let self = self else { return }
-                let categoryItems = self.dataSource.snapshot().itemIdentifiers(inSection: .category)
-                self.updateSnapshot(item: categoryItems)
-            }.store(in: &subscriptions)
-        
+
         viewModel.selectedInfo
             .compactMap { $0 }
             .receive(on: RunLoop.main)
             .sink { [weak self] selectedItem in
                 guard let self = self else { return }
                 if self.isEditing {
-                    self.viewModel.toggleItemSelection(selectedItem, isEditing: true)
-                    if case let .informationItem(info) = HomeViewModel.Item.informationItem(selectedItem) {
-                        self.updateSnapshot(item: [.informationItem(info)])
-                    }
+                    self.viewModel.toggleItemSelection(selectedItem)
                 } else {
-                    print(">>> selected: \(selectedItem.title)")
                     self.presentViewController(item: .informationItem(selectedItem))
                 }
             }.store(in: &subscriptions)
@@ -74,7 +61,9 @@ class HomeViewController: UIViewController {
         viewModel.selectedItems
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                self?.toolbarItems = self?.isEditing ?? false ? self?.editToolBarItem() : self?.defaultToolBarItem()
+                guard let self = self else { return }
+                self.reloadSnapshot(section: HomeViewModel.Section.information)
+                self.toolbarItems = self.isEditing ? self.editToolBarItem() : self.defaultToolBarItem()
             }.store(in: &subscriptions)
         
         viewModel.filteredItems
@@ -150,7 +139,6 @@ class HomeViewController: UIViewController {
             target: self,
             action: #selector(selectAllItems)
         )
-        selectAllButton.tag = 11
         
         let deleteItem = UIBarButtonItem(
             title: "삭제",
@@ -164,22 +152,15 @@ class HomeViewController: UIViewController {
     }
     
     @objc private func navigateToPage(_ sender: UIBarButtonItem) {
-        switch sender.tag {
-        case 1:
-            let storyboard = UIStoryboard(name: "Setting", bundle: nil)
-            let vc = storyboard.instantiateViewController(withIdentifier: "SettingViewController") as! SettingViewController
-            self.navigationController?.pushViewController(vc, animated: true)
-        case 2:
-            let storyboard = UIStoryboard(name: "Category", bundle: nil)
-            let vc = storyboard.instantiateViewController(withIdentifier: "CategoryViewController") as! CategoryViewController
-            self.navigationController?.pushViewController(vc, animated: true)
-        case 3:
-            let storyboard = UIStoryboard(name: "AddInfo", bundle: nil)
-            let vc = storyboard.instantiateViewController(withIdentifier: "AddInfoViewController") as! AddInfoViewController
-            self.navigationController?.pushViewController(vc, animated: true)
-        default:
-            return
-        }
+        let viewControllers: [Int: (storyboard: String, viewControllerID: String)] = [
+            1: ("Setting", "SettingViewController"),
+            2: ("Category", "CategoryViewController"),
+            3: ("AddInfo", "AddInfoViewController")
+        ]
+        guard let viewControllerInfo = viewControllers[sender.tag] else { return }
+        let storyboard = UIStoryboard(name: viewControllerInfo.storyboard, bundle: nil)
+        let vc = storyboard.instantiateViewController(withIdentifier: viewControllerInfo.viewControllerID)
+        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     override func setEditing(_ editing: Bool, animated: Bool) {
@@ -277,9 +258,9 @@ class HomeViewController: UIViewController {
         dataSource.apply(snapshot, animatingDifferences: false)
     }
     
-    private func updateSnapshot(item: [HomeViewModel.Item]) {
+    private func reloadSnapshot(section: HomeViewModel.Section) {
         var snapshot = dataSource.snapshot()
-        snapshot.reloadItems(item)
+        snapshot.reloadSections([section])
         dataSource.apply(snapshot, animatingDifferences: false)
     }
     
@@ -288,7 +269,7 @@ class HomeViewController: UIViewController {
         let existingItems = snapshot.itemIdentifiers(inSection: .information)
         snapshot.deleteItems(existingItems)
         snapshot.appendItems(searchItems, toSection: .information)
-        dataSource.apply(snapshot, animatingDifferences: true)
+        dataSource.apply(snapshot, animatingDifferences: false)
     }
     
     private func layout() -> UICollectionViewCompositionalLayout {
@@ -330,9 +311,9 @@ extension HomeViewController: UICollectionViewDelegate, UISearchBarDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         switch HomeViewModel.Section(rawValue: indexPath.section) {
         case .category:
-                if let item = dataSource.itemIdentifier(for: indexPath) {
-                    viewModel.didCategorySelect(id: item.id)
-                }
+            if let item = dataSource.itemIdentifier(for: indexPath) {
+                viewModel.didCategorySelect(id: item.id)
+            }
         case .information:
             if let item = dataSource.itemIdentifier(for: indexPath) {
                 viewModel.didInfoSelect(id: item.id)
