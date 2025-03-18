@@ -110,9 +110,9 @@ class EditInfoViewController: UIViewController {
                     textField.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -10),
                     textField.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
                 ])
-            } else if section == .description {
+            } else if section == .details {
                 let textField = UITextField()
-                textField.text = self.viewModel.infoItems.value.description
+                textField.text = self.viewModel.infoItems.value.details
                 textField.placeholder = "설명"
                 textField.clearButtonMode = .whileEditing
                 textField.frame = CGRect(x: 20, y: 0, width: cell.bounds.width, height: cell.bounds.height)
@@ -157,10 +157,10 @@ class EditInfoViewController: UIViewController {
     private func applySnapshot(_ items: InfoData) {
         var snapshot = NSDiffableDataSourceSnapshot<EditInfoViewModel.Section, EditInfoViewModel.Item>()
         snapshot.appendSections(EditInfoViewModel.Section.allCases)
-        snapshot.appendItems([InfoData(title: items.title, description: "", urlString: "", imageURL: "", category: CategoryData(title: ""))], toSection: .title)
-        snapshot.appendItems([InfoData(title: "", description: items.description, urlString: "", imageURL: "", category: CategoryData(title: ""))], toSection: .description)
-        snapshot.appendItems([InfoData(title: "", description: "", urlString: items.urlString, imageURL: "", category: CategoryData(title: ""))], toSection: .url)
-        snapshot.appendItems([InfoData(title: "", description: "", urlString: "", imageURL: "", category: CategoryData(title: items.category.title))], toSection: .button)
+        snapshot.appendItems([InfoData(title: items.title, details: "", urlString: "", imageURL: "", category: CategoryData(title: ""))], toSection: .title)
+        snapshot.appendItems([InfoData(title: "", details: items.details, urlString: "", imageURL: "", category: CategoryData(title: ""))], toSection: .details)
+        snapshot.appendItems([InfoData(title: "", details: "", urlString: items.urlString, imageURL: "", category: CategoryData(title: ""))], toSection: .url)
+        snapshot.appendItems([InfoData(title: "", details: "", urlString: "", imageURL: "", category: CategoryData(title: items.category.title))], toSection: .button)
         dataSource.apply(snapshot, animatingDifferences: true)
     }
     

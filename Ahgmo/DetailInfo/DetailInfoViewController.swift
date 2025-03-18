@@ -102,7 +102,7 @@ class DetailInfoViewController: UIViewController {
             if section == .url {
                 content.text = item.urlString
             } else {
-                content.text = item.description
+                content.text = item.details
             }
             cell.contentConfiguration = content
         }
@@ -125,8 +125,8 @@ class DetailInfoViewController: UIViewController {
     private func applySnapshot(_ items: InfoData) {
         var snapshot = NSDiffableDataSourceSnapshot<DetailInfoViewModel.Section, DetailInfoViewModel.Item>()
         snapshot.appendSections(DetailInfoViewModel.Section.allCases)
-        snapshot.appendItems([InfoData(title: items.title, description: "", urlString: items.urlString, imageURL: "", category: CategoryData(title: ""))], toSection: .url)
-        snapshot.appendItems([InfoData(title: items.title, description: items.description, urlString: "", imageURL: "", category: CategoryData(title: ""))], toSection: .description)
+        snapshot.appendItems([InfoData(title: items.title, details: "", urlString: items.urlString, imageURL: "", category: CategoryData(title: ""))], toSection: .url)
+        snapshot.appendItems([InfoData(title: items.title, details: items.details, urlString: "", imageURL: "", category: CategoryData(title: ""))], toSection: .details)
         dataSource.apply(snapshot)
     }
     

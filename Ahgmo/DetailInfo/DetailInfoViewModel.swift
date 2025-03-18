@@ -19,12 +19,12 @@ final class DetailInfoViewModel {
     
     enum Section: Int, CaseIterable {
         case url
-        case description
+        case details
         
         var title: String {
             switch self {
             case .url: return "URL"
-            case .description: return "설명"
+            case .details: return "설명"
             }
         }
     }

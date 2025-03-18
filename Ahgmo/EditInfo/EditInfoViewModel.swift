@@ -19,14 +19,14 @@ final class EditInfoViewModel {
     
     enum Section: Int, CaseIterable {
         case title
-        case description
+        case details
         case url
         case button
         
         var title: String {
             switch self {
             case .title: return "제목"
-            case .description: return "설명"
+            case .details: return "설명"
             case .url: return "URL"
             case .button: return "카테고리"
             }
