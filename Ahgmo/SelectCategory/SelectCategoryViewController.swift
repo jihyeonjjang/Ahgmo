@@ -63,7 +63,7 @@ class SelectCategoryViewController: UIViewController {
     }
     
     private func configureNavigationItem() {
-        self.navigationItem.title = "카테고리"
+        self.navigationItem.title = "카테고리 선택"
         self.navigationItem.largeTitleDisplayMode = .never
         
         let cancelItem = UIBarButtonItem(
