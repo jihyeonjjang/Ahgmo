@@ -17,39 +17,29 @@ class SettingViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel = SettingViewModel(setData:[
-            .sort: [
-                SettingViewModel.Item(title: "정보", type: .info),
-                SettingViewModel.Item(title: "카테고리", type: .category)
-            ],
-            .service: [
-                SettingViewModel.Item(title: "앱정보", type: .appInfo),
-                SettingViewModel.Item(title: "문의하기", type: .contact)
-            ]
-        ], isSortedAscending: false)
+        viewModel = SettingViewModel(sortingItems: SortType.list, serviceItems: ["앱정보", "문의하기"])
         bind()
         configureNavigationItem()
         configureCollectionView()
     }
     
     private func bind() {
-        viewModel.setData
+        viewModel.sortingItems
             .receive(on: RunLoop.main)
             .sink { [weak self] data in
-                self?.applySnapshot(data)
+                guard let self = self else { return }
+                self.applySnapshot(data.map { SettingViewModel.Item.sortingItem($0) })
             }.store(in: &subscriptions)
         
         viewModel.selectedItem
             .compactMap { $0 }
             .receive(on: RunLoop.main)
             .sink { [weak self] selectedItem in
-                switch selectedItem.type {
-                case .appInfo:
-                    self?.presentViewController()
-                case .contact:
-                    self?.presentMailComposer()
-                case .info, .category:
-                    break
+                guard let self = self else { return }
+                if selectedItem == "앱정보" {
+                    self.presentViewController()
+                } else {
+                    self.presentMailComposer()
                 }
             }.store(in: &subscriptions)
     }
@@ -85,11 +75,19 @@ class SettingViewController: UIViewController {
     
     private func configureSortCell(cell: UICollectionViewListCell, item: SettingViewModel.Item) {
         let titleLabel = UILabel()
-        let sortTypeButton = UIButton()
+        let sortTypeButton = UIButton(primaryAction: nil)
+        let titleClosure = { (action: UIAction) in
+            self.viewModel.updateSortOption()
+            sortTypeButton.setTitle(action.title, for: .normal)
+        }
         
         titleLabel.text = item.title
-        updateSortButtonTitle(sortTypeButton)
+        sortTypeButton.menu = UIMenu(title: "정렬방식", children: [
+            UIAction(title: "오름차순", state: item.isSortedAscending ?? true ? .on : .off, handler: titleClosure),
+            UIAction(title: "내림차순", state: item.isSortedAscending ?? true ? .off : .on, handler: titleClosure)
+        ])
         sortTypeButton.setTitleColor(.systemBlue, for: .normal)
+        sortTypeButton.titleLabel?.font = .systemFont(ofSize: 17, weight: .regular)
         sortTypeButton.contentHorizontalAlignment = .right
         
         cell.contentView.addSubview(titleLabel)
@@ -106,28 +104,8 @@ class SettingViewController: UIViewController {
             sortTypeButton.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
         ])
         
-        updateMenuItems(sortTypeButton)
         sortTypeButton.showsMenuAsPrimaryAction = true
-    }
-    
-    private func updateSortButtonTitle(_ button: UIButton) {
-        button.setTitle(viewModel.isSortedAscending.value ? "오름차순" : "내림차순", for: .normal)
-    }
-    
-    private func updateMenuItems(_ button: UIButton) {
-        let ascendingAction = UIAction(title: "오름차순", state: viewModel.isSortedAscending.value ? .on : .off) { [weak self] _ in
-            self?.viewModel.isSortedAscending.value = true
-            self?.updateSortButtonTitle(button)
-            self?.updateMenuItems(button)
-        }
-        
-        let descendingAction = UIAction(title: "내림차순", state: viewModel.isSortedAscending.value ? .off : .on) { [weak self] _ in
-            self?.viewModel.isSortedAscending.value = false
-            self?.updateSortButtonTitle(button)
-            self?.updateMenuItems(button)
-        }
-        
-        button.menu = UIMenu(title: "", children: [ascendingAction, descendingAction])
+        sortTypeButton.changesSelectionAsPrimaryAction = true
     }
     
     private func configureServiceCell(cell: UICollectionViewListCell, item: SettingViewModel.Item) {
@@ -136,12 +114,11 @@ class SettingViewController: UIViewController {
         cell.contentConfiguration = content
     }
     
-    private func applySnapshot(_ items: [SettingViewModel.Section: [SettingViewModel.Item]]) {
+    private func applySnapshot(_ items: [SettingViewModel.Item]) {
         var snapshot = NSDiffableDataSourceSnapshot<SettingViewModel.Section, SettingViewModel.Item>()
         snapshot.appendSections(SettingViewModel.Section.allCases)
-        for (section, item) in items {
-            snapshot.appendItems(item, toSection: section)
-        }
+        snapshot.appendItems(items, toSection: .sort)
+        snapshot.appendItems(viewModel.serviceItems.value.map(SettingViewModel.Item.serviceItem), toSection: .service)
         dataSource.apply(snapshot, animatingDifferences: true)
     }
     
@@ -168,11 +145,7 @@ class SettingViewController: UIViewController {
 
 extension SettingViewController: UICollectionViewDelegate, MFMailComposeViewControllerDelegate {
     func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
-        guard let section = SettingViewModel.Section(rawValue: indexPath.section) else { return false }
-        if section == .sort {
-            return false
-        }
-        return true
+        return SettingViewModel.Section(rawValue: indexPath.section) == .service
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -196,4 +169,13 @@ extension SettingViewController: UICollectionViewDelegate, MFMailComposeViewCont
             break
         }
     }
+}
+
+#Preview("SettingViewController") {
+    let vc = UIStoryboard(name: "Setting", bundle: nil)
+        .instantiateViewController(withIdentifier: "SettingViewController") as! SettingViewController
+    
+    let navVC = UINavigationController(rootViewController: vc)
+    
+    return navVC
 }

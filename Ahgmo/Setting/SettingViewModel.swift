@@ -9,13 +9,13 @@ import Foundation
 import Combine
 
 final class SettingViewModel {
-    let setData: CurrentValueSubject<[Section: [Item]], Never>
-    let isSortedAscending: CurrentValueSubject<Bool, Never>
-    let selectedItem: CurrentValueSubject<Item?, Never>
+    let sortingItems: CurrentValueSubject<[SortType], Never>
+    let serviceItems: CurrentValueSubject<[String], Never>
+    let selectedItem: CurrentValueSubject<String?, Never>
     
-    init(setData: [Section : [Item]], isSortedAscending: Bool, selectedItem: Item? = nil) {
-        self.setData = CurrentValueSubject(setData)
-        self.isSortedAscending = CurrentValueSubject(isSortedAscending)
+    init(sortingItems: [SortType], serviceItems: [String], selectedItem: String? = nil) {
+        self.sortingItems = CurrentValueSubject(sortingItems)
+        self.serviceItems = CurrentValueSubject(serviceItems)
         self.selectedItem = CurrentValueSubject(selectedItem)
     }
     
@@ -24,22 +24,42 @@ final class SettingViewModel {
         case service
     }
     
-    struct Item: Hashable {
-        enum ItemType {
-            case info
-            case category
-            case appInfo
-            case contact
+    enum Item: Hashable {
+        case sortingItem(SortType)
+        case serviceItem(String)
+        
+        var title: String {
+            switch self {
+            case .sortingItem(let sortType):
+                return sortType.title
+            case .serviceItem(let serviceName):
+                return serviceName
+            }
         }
         
-        let title: String
-        let type: ItemType
+        var isSortedAscending: Bool? {
+            switch self {
+            case .sortingItem(let sortType):
+                return sortType.isSortedAscending
+            case .serviceItem(_):
+                return nil
+            }
+        }
     }
     
     func didSelect(at indexPath: IndexPath) {
-        if let section = Section(rawValue: indexPath.section), let items = setData.value[section] {
-            let item = items[indexPath.row]
-            selectedItem.send(item)
-        }
+        let item = serviceItems.value[indexPath.row]
+        selectedItem.send(item)
+    }
+    
+    func updateSortOption() {
+        // sortOption Update
+        
+//    func updateSortOption(id: UUID, to isAscending: Bool) {
+//        var updatedItems = sortingItems.value
+//        if let index = updatedItems.firstIndex(where: { $0.id == id }) {
+//            updatedItems[index].isSortedAscending = isAscending
+//            sortingItems.send(updatedItems)
+//        }
     }
 }
