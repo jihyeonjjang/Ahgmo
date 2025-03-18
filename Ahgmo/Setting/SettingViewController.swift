@@ -170,12 +170,3 @@ extension SettingViewController: UICollectionViewDelegate, MFMailComposeViewCont
         }
     }
 }
-
-#Preview("SettingViewController") {
-    let vc = UIStoryboard(name: "Setting", bundle: nil)
-        .instantiateViewController(withIdentifier: "SettingViewController") as! SettingViewController
-    
-    let navVC = UINavigationController(rootViewController: vc)
-    
-    return navVC
-}
