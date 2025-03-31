@@ -10,7 +10,7 @@ import Combine
 import CoreData
 
 final class SettingViewModel {
-    let sortingItems: CurrentValueSubject<[SortType], Never>
+    let sortingItems: CurrentValueSubject<[SortTypeEntity], Never>
     let serviceItems: CurrentValueSubject<[String], Never>
     let selectedItem: CurrentValueSubject<String?, Never>
     
@@ -22,7 +22,7 @@ final class SettingViewModel {
     }
     
     private func fetchSortTypes() {
-        let sortTypeFetchRequest = NSFetchRequest<SortType>(entityName: "SortType")
+        let sortTypeFetchRequest = NSFetchRequest<SortTypeEntity>(entityName: "SortTypeEntity")
         self.sortingItems.value = CoreDataManager.shared.fetchContext(request: sortTypeFetchRequest)
     }
     
@@ -32,7 +32,7 @@ final class SettingViewModel {
     }
     
     enum Item: Hashable {
-        case sortingItem(SortType)
+        case sortingItem(SortTypeEntity)
         case serviceItem(String)
         
         var title: String {

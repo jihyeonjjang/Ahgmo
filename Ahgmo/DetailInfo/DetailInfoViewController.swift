@@ -117,7 +117,7 @@ class DetailInfoViewController: UIViewController {
         collectionView.delegate = self
     }
     
-    private func applySnapshot(_ items: Information) {
+    private func applySnapshot(_ items: InfoEntity) {
         var snapshot = NSDiffableDataSourceSnapshot<DetailInfoViewModel.Section, DetailInfoViewModel.Item>()
         snapshot.appendSections(DetailInfoViewModel.Section.allCases)
         

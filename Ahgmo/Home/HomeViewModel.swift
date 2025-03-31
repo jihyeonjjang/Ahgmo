@@ -10,14 +10,14 @@ import Combine
 import CoreData
 
 final class HomeViewModel {
-    let categoryItems: CurrentValueSubject<[Category], Never>
-    let infoItems: CurrentValueSubject<[Information], Never>
-    var filteredItems: CurrentValueSubject<[Information], Never>
-    var selectedInfo: CurrentValueSubject<Information?, Never>
-    var selectedItems: CurrentValueSubject<Set<Information>, Never>
+    let categoryItems: CurrentValueSubject<[CategoryEntity], Never>
+    let infoItems: CurrentValueSubject<[InfoEntity], Never>
+    var filteredItems: CurrentValueSubject<[InfoEntity], Never>
+    var selectedInfo: CurrentValueSubject<InfoEntity?, Never>
+    var selectedItems: CurrentValueSubject<Set<InfoEntity>, Never>
     var isSelectAll: CurrentValueSubject<Bool, Never>
     
-    init(selectedInfo: Information? = nil) {
+    init(selectedInfo: InfoEntity? = nil) {
         self.categoryItems = CurrentValueSubject([])
         self.infoItems = CurrentValueSubject([])
         self.filteredItems = CurrentValueSubject([])
@@ -28,8 +28,8 @@ final class HomeViewModel {
     }
     
     private func fetchDatas() {
-        let categoryFetchRequest = NSFetchRequest<Category>(entityName: "Category")
-        let informationsFetchRequest = NSFetchRequest<Information>(entityName: "Information")
+        let categoryFetchRequest = NSFetchRequest<CategoryEntity>(entityName: "CategoryEntity")
+        let informationsFetchRequest = NSFetchRequest<InfoEntity>(entityName: "InfoEntity")
         
         self.categoryItems.value = CoreDataManager.shared.fetchContext(request: categoryFetchRequest)
         let informations = CoreDataManager.shared.fetchContext(request: informationsFetchRequest)
@@ -43,8 +43,8 @@ final class HomeViewModel {
     }
     
     enum Item: Hashable {
-        case categoryItem(Category)
-        case informationItem(Information)
+        case categoryItem(CategoryEntity)
+        case informationItem(InfoEntity)
         
         var title: String {
             switch self {
@@ -87,7 +87,7 @@ final class HomeViewModel {
         }
     }
     
-    func toggleItemSelection(_ item: Information) {
+    func toggleItemSelection(_ item: InfoEntity) {
         var currentItems = selectedItems.value
         if currentItems.contains(item) {
             currentItems.remove(item)

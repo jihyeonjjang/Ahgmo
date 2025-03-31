@@ -9,10 +9,10 @@ import Foundation
 import Combine
 
 final class EditInfoViewModel {
-    let infoItem: CurrentValueSubject<Information, Never>
-    let selectedItem: CurrentValueSubject<Category?, Never>
+    let infoItem: CurrentValueSubject<InfoEntity, Never>
+    let selectedItem: CurrentValueSubject<CategoryEntity?, Never>
     
-    init(infoItem: Information, selectedItem: Category? = nil) {
+    init(infoItem: InfoEntity, selectedItem: CategoryEntity? = nil) {
         self.infoItem = CurrentValueSubject(infoItem)
         self.selectedItem = CurrentValueSubject(selectedItem)
     }

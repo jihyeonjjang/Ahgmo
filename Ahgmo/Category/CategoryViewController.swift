@@ -12,7 +12,7 @@ class CategoryViewController: UIViewController {
     var subscriptions = Set<AnyCancellable>()
     var viewModel: CategoryViewModel!
     
-    var filteredItems: [Category] = []
+    var filteredItems: [CategoryEntity] = []
     let searchManager = SearchManager()
     
     var collectionView: UICollectionView!

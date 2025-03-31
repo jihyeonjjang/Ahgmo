@@ -23,7 +23,7 @@ class AddInfoViewController: UIViewController {
     var subscriptions = Set<AnyCancellable>()
     let didSelect = PassthroughSubject<Void, Never>()
     let keyboardWillHide = PassthroughSubject<Void, Never>()
-    var selectedCategory: Category?
+    var selectedCategory: CategoryEntity?
     
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<Section, Item>!

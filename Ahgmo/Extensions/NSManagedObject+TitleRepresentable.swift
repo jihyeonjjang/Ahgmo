@@ -8,13 +8,13 @@
 import Foundation
 import CoreData
 
-extension Category: TitleRepresentable {
+extension CategoryEntity: TitleRepresentable {
     var contextTitle: String {
         return self.title ?? ""
     }
 }
 
-extension Information: TitleRepresentable {
+extension InfoEntity: TitleRepresentable {
     var contextTitle: String {
         return self.title ?? ""
     }

@@ -12,13 +12,13 @@ class SelectCategoryViewController: UIViewController {
     var subscriptions = Set<AnyCancellable>()
     var viewModel: SelectCategoryViewModel!
     
-    var filteredItems: [Category] = []
+    var filteredItems: [CategoryEntity] = []
     let searchManager = SearchManager()
     
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<SelectCategoryViewModel.Section, SelectCategoryViewModel.Item>!
     
-    var completion: ((Category) -> Void)?
+    var completion: ((CategoryEntity) -> Void)?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -125,7 +125,7 @@ class SelectCategoryViewController: UIViewController {
         }
     }
     
-    private func applySnapshot(_ items: [Category]) {
+    private func applySnapshot(_ items: [CategoryEntity]) {
         var snapshot = NSDiffableDataSourceSnapshot<SelectCategoryViewModel.Section, SelectCategoryViewModel.Item>()
         snapshot.appendSections([.main])
         snapshot.appendItems(items, toSection: .main)

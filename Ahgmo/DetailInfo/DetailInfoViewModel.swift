@@ -9,10 +9,10 @@ import Foundation
 import Combine
 
 final class DetailInfoViewModel {
-    let infoItem: CurrentValueSubject<Information, Never>
+    let infoItem: CurrentValueSubject<InfoEntity, Never>
     let selectedItem: CurrentValueSubject<URL?, Never>
     
-    init(infoItem: Information, selectedItem: URL? = nil) {
+    init(infoItem: InfoEntity, selectedItem: URL? = nil) {
         self.infoItem = CurrentValueSubject(infoItem)
         self.selectedItem = CurrentValueSubject(selectedItem)
     }

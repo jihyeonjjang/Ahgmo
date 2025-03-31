@@ -9,9 +9,9 @@ import Foundation
 import Combine
 
 final class EditCategoryViewModel {
-    let categoryItems: CurrentValueSubject<Category, Never>
+    let categoryItems: CurrentValueSubject<CategoryEntity, Never>
     
-    init(categoryItems: Category) {
+    init(categoryItems: CategoryEntity) {
         self.categoryItems = CurrentValueSubject(categoryItems)
     }
     
@@ -19,5 +19,5 @@ final class EditCategoryViewModel {
         case main
     }
     
-    typealias Item = Category
+    typealias Item = CategoryEntity
 }

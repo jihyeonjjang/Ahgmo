@@ -135,7 +135,7 @@ class EditInfoViewController: UIViewController {
         collectionView.delegate = self
     }
     
-    private func applySnapshot(_ items: Information) {
+    private func applySnapshot(_ items: InfoEntity) {
         var snapshot = NSDiffableDataSourceSnapshot<EditInfoViewModel.Section, EditInfoViewModel.Item>()
         snapshot.appendSections(EditInfoViewModel.Section.allCases)
         
@@ -153,7 +153,7 @@ class EditInfoViewController: UIViewController {
         dataSource.apply(snapshot, animatingDifferences: true)
     }
     
-    private func changeCategorySnapshot(_ item: Information) {
+    private func changeCategorySnapshot(_ item: InfoEntity) {
         var snapshot = dataSource.snapshot()
         let existingItems = snapshot.itemIdentifiers(inSection: .button)
         snapshot.deleteItems(existingItems)
@@ -162,7 +162,7 @@ class EditInfoViewController: UIViewController {
         dataSource.apply(snapshot, animatingDifferences: false)
     }
     
-    private func presentViewController(_ selectedCategory: Category) {
+    private func presentViewController(_ selectedCategory: CategoryEntity) {
         let storyboard = UIStoryboard(name: "SelectCategory", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "SelectCategoryViewController") as! SelectCategoryViewController
         vc.viewModel = SelectCategoryViewModel(initialCategory: selectedCategory)

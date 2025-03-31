@@ -10,11 +10,11 @@ import Combine
 import CoreData
 
 final class SelectCategoryViewModel {
-    let categoryItems: CurrentValueSubject<[Category], Never>
-    let initialCategory: CurrentValueSubject<Category?, Never>
-    let selectedItem: CurrentValueSubject<Category?, Never>
+    let categoryItems: CurrentValueSubject<[CategoryEntity], Never>
+    let initialCategory: CurrentValueSubject<CategoryEntity?, Never>
+    let selectedItem: CurrentValueSubject<CategoryEntity?, Never>
     
-    init(initialCategory: Category? = nil, selectedItem: Category? = nil) {
+    init(initialCategory: CategoryEntity? = nil, selectedItem: CategoryEntity? = nil) {
         self.categoryItems = CurrentValueSubject([])
         self.initialCategory = CurrentValueSubject(initialCategory)
         self.selectedItem = CurrentValueSubject(selectedItem)
@@ -22,14 +22,14 @@ final class SelectCategoryViewModel {
     }
     
     private func fetchCategories() {
-        let categoryFetchRequest = NSFetchRequest<Category>(entityName: "Category")
+        let categoryFetchRequest = NSFetchRequest<CategoryEntity>(entityName: "CategoryEntity")
         self.categoryItems.value = CoreDataManager.shared.fetchContext(request: categoryFetchRequest)
     }
     
     enum Section {
         case main
     }
-    typealias Item = Category
+    typealias Item = CategoryEntity
     
     func didSelect(id: UUID) {
         if let category = categoryItems.value.first(where: { $0.id == id }) {

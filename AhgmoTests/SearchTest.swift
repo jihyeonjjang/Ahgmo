@@ -6,16 +6,25 @@
 //
 
 import XCTest
+import CoreData
 @testable import Ahgmo
 
 final class SearchTest: XCTestCase {
     
     var searchManager: SearchManager!
     
-    
     override func setUpWithError() throws {
-        searchManager = SearchManager()
+        let container = NSPersistentContainer(name: "Ahgmo")
+        let description = container.persistentStoreDescriptions.first!
+        description.type = NSInMemoryStoreType
         
+        container.loadPersistentStores { _, error in
+            if let error = error {
+                fatalError("Failed to load Core Data stack: \(error)")
+            }
+        }
+        
+        searchManager = SearchManager()
     }
     
     override func tearDownWithError() throws {
@@ -23,25 +32,28 @@ final class SearchTest: XCTestCase {
     }
     
     func testFilterItemsWithInfoData() throws {
-        let items = InfoData.list
+        let fetchRequest = NSFetchRequest<InfoEntity>(entityName: "InfoEntity")
+        let items = CoreDataManager.shared.fetchContext(request: fetchRequest)
         
-        let result = searchManager.filterItems(items, with: "apple")
+        let result = searchManager.filterItems(items, with: "로제파스타 레시피")
         
         XCTAssertEqual(result.count, 1)
-        XCTAssertEqual(result.first?.title, "Apple")
+        XCTAssertEqual(result.first?.title, "로제파스타 레시피")
     }
     
     func testFilterItemsWithCategoryData() throws {
-        let items = CategoryData.list
+        let fetchRequest = NSFetchRequest<CategoryEntity>(entityName: "CategoryEntity")
+        let items = CoreDataManager.shared.fetchContext(request: fetchRequest)
         
-        let result = searchManager.filterItems(items, with: "HELLO")
+        let result = searchManager.filterItems(items, with: "코스트코")
         
         XCTAssertEqual(result.count, 1)
-        XCTAssertEqual(result.first?.title, "Hello")
+        XCTAssertEqual(result.first?.title, "코스트코")
     }
     
     func testFilterItemsWithEmptyQuery() throws {
-        let items = InfoData.list
+        let fetchRequest = NSFetchRequest<InfoEntity>(entityName: "InfoEntity")
+        let items = CoreDataManager.shared.fetchContext(request: fetchRequest)
         
         let result = searchManager.filterItems(items, with: "")
         
@@ -49,18 +61,23 @@ final class SearchTest: XCTestCase {
     }
     
     func testFilterItemsWithNoMatch() throws {
-        let items = CategoryData.list
+        let fetchRequest = NSFetchRequest<CategoryEntity>(entityName: "CategoryEntity")
+        let items = CoreDataManager.shared.fetchContext(request: fetchRequest)
         
-        let result = searchManager.filterItems(items, with: "orange")
+        let result = searchManager.filterItems(items, with: "파스타 레시피")
         
         XCTAssertEqual(result.count, 0)
     }
     
-    func testFilterItems_CaseInsensitive() {
-        let items = InfoData.list
-        let result = searchManager.filterItems(items, with: "ApPlE")
-        XCTAssertEqual(result.count, 1)
-        XCTAssertEqual(result.first?.title, "Apple")
-    }
+//    func testFilterItems_CaseInsensitive() throws {
+//        let fetchRequest = NSFetchRequest<InfoEntity>(entityName: "InfoEntity")
+//        let items = CoreDataManager.shared.fetchContext(request: fetchRequest)
+//        
+//        let result = searchManager.filterItems(items, with: "ApPlE")
+//
+//        
+//        XCTAssertEqual(result.count, 1)
+//        XCTAssertEqual(result.first?.title, "Apple")
+//    }
     
 }

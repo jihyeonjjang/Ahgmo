@@ -40,8 +40,8 @@ final class CoreDataManager {
     }
     
     @discardableResult
-    func saveInfo(information: Information) -> Bool {
-        let entity = NSEntityDescription.entity(forEntityName: "Information", in: self.context)
+    func saveInfo(information: InfoEntity) -> Bool {
+        let entity = NSEntityDescription.entity(forEntityName: "InfoEntity", in: self.context)
         if let entity = entity {
             let managedObject = NSManagedObject(entity: entity, insertInto: self.context)
             managedObject.setValue(information.title, forKey: "title")
@@ -63,8 +63,8 @@ final class CoreDataManager {
     }
     
     @discardableResult
-    func saveCategory(category: Category) -> Bool {
-        let entity = NSEntityDescription.entity(forEntityName: "Category", in: self.context)
+    func saveCategory(category: CategoryEntity) -> Bool {
+        let entity = NSEntityDescription.entity(forEntityName: "CategoryEntity", in: self.context)
         if let entity = entity {
             let managedObject = NSManagedObject(entity: entity, insertInto: self.context)
             managedObject.setValue(category.title, forKey: "title")
@@ -109,9 +109,9 @@ final class CoreDataManager {
     func insertMockData() {
         let context = persistentContainer.viewContext
         
-        let categoryFetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
-        let infoFetchRequest: NSFetchRequest<Information> = Information.fetchRequest()
-        let sortTypeFetchRequest: NSFetchRequest<SortType> = SortType.fetchRequest()
+        let categoryFetchRequest: NSFetchRequest<CategoryEntity> = CategoryEntity.fetchRequest()
+        let infoFetchRequest: NSFetchRequest<InfoEntity> = InfoEntity.fetchRequest()
+        let sortTypeFetchRequest: NSFetchRequest<SortTypeEntity> = SortTypeEntity.fetchRequest()
         
         do {
             let existingCategories = try context.fetch(categoryFetchRequest)
@@ -126,23 +126,23 @@ final class CoreDataManager {
             print("데이터 체크 중 오류 발생: \(error)")
         }
         
-        let category1 = Category(context: context)
+        let category1 = CategoryEntity(context: context)
         category1.id = UUID()
         category1.title = "요리"
         
-        let category2 = Category(context: context)
+        let category2 = CategoryEntity(context: context)
         category2.id = UUID()
         category2.title = "신발"
         
-        let category3 = Category(context: context)
+        let category3 = CategoryEntity(context: context)
         category3.id = UUID()
         category3.title = "코스트코"
         
-        let category4 = Category(context: context)
+        let category4 = CategoryEntity(context: context)
         category4.id = UUID()
         category4.title = "아우터"
         
-        let info1 = Information(context: context)
+        let info1 = InfoEntity(context: context)
         info1.id = UUID()
         info1.title = "로제파스타 레시피"
         info1.details = "편스토랑 류수영 레시피"
@@ -150,7 +150,7 @@ final class CoreDataManager {
         info1.imageURL = "https://img.youtube.com/vi/myYOcLR8Ni4/mqdefault.jpg"
         info1.categoryItem = category1
         
-        let info2 = Information(context: context)
+        let info2 = InfoEntity(context: context)
         info2.id = UUID()
         info2.title = "호카 본디 8"
         info2.details = "족저근막염에 좋은 신발"
@@ -158,7 +158,7 @@ final class CoreDataManager {
         info2.imageURL = "https://img.youtube.com/vi/xDHDEWG1kG4/mqdefault.jpg"
         info2.categoryItem = category2
         
-        let info3 = Information(context: context)
+        let info3 = InfoEntity(context: context)
         info3.id = UUID()
         info3.title = "코스트코 베이글"
         info3.details = "13번"
@@ -166,7 +166,7 @@ final class CoreDataManager {
         info3.imageURL = "https://img.youtube.com/vi/xDHDEWG1kG4/mqdefault.jpg"
         info3.categoryItem = category3
         
-        let info4 = Information(context: context)
+        let info4 = InfoEntity(context: context)
         info4.id = UUID()
         info4.title = "코스트코 샐러드"
         info4.details = "14번"
@@ -174,7 +174,7 @@ final class CoreDataManager {
         info4.imageURL = "https://img.youtube.com/vi/xDHDEWG1kG4/mqdefault.jpg"
         info4.categoryItem = category3
         
-        let info5 = Information(context: context)
+        let info5 = InfoEntity(context: context)
         info5.id = UUID()
         info5.title = "무탠다드 코트"
         info5.details = "발마칸, 99890원"
@@ -182,7 +182,7 @@ final class CoreDataManager {
         info5.imageURL = "https://img.youtube.com/vi/myYOcLR8Ni4/mqdefault.jpg"
         info5.categoryItem = category4
         
-        let info6 = Information(context: context)
+        let info6 = InfoEntity(context: context)
         info6.id = UUID()
         info6.title = "디네댓 패딩"
         info6.details = "덕다운, 191200원"
@@ -190,7 +190,7 @@ final class CoreDataManager {
         info6.imageURL = "https://img.youtube.com/vi/myYOcLR8Ni4/mqdefault.jpg"
         info6.categoryItem = category4
         
-        let info7 = Information(context: context)
+        let info7 = InfoEntity(context: context)
         info7.id = UUID()
         info7.title = "뉴발란스 패딩"
         info7.details = "구스다운, 299000원"
@@ -198,12 +198,12 @@ final class CoreDataManager {
         info7.imageURL = "https://img.youtube.com/vi/myYOcLR8Ni4/mqdefault.jpg"
         info7.categoryItem = category4
         
-        let sortType1 = SortType(context: context)
+        let sortType1 = SortTypeEntity(context: context)
         sortType1.id = UUID()
         sortType1.title = "정보"
         sortType1.isSortedAscending = true
         
-        let sortType2 = SortType(context: context)
+        let sortType2 = SortTypeEntity(context: context)
         sortType2.id = UUID()
         sortType2.title = "카테고리"
         sortType2.isSortedAscending = true
