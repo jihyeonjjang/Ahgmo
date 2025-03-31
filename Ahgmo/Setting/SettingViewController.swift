@@ -8,6 +8,8 @@
 import UIKit
 import Combine
 import MessageUI
+import CoreData
+import SafariServices
 
 class SettingViewController: UIViewController {
     var subscriptions = Set<AnyCancellable>()
@@ -17,7 +19,7 @@ class SettingViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel = SettingViewModel(sortingItems: SortType.list, serviceItems: ["앱정보", "문의하기"])
+        viewModel = SettingViewModel(serviceItems: ["버전 정보", "사용자 가이드", "문의하기"])
         bind()
         configureNavigationItem()
         configureCollectionView()
@@ -36,9 +38,11 @@ class SettingViewController: UIViewController {
             .receive(on: RunLoop.main)
             .sink { [weak self] selectedItem in
                 guard let self = self else { return }
-                if selectedItem == "앱정보" {
-                    self.presentViewController()
-                } else {
+                if selectedItem == "사용자 가이드" {
+                    // 노션 링크 연결
+                    let safari = SFSafariViewController(url: URL(string: "https://grey-backbone-80f.notion.site/Ahgmo-1bf890ca890480be8443d6a1289a4a94?pvs=4")!)
+                    self.present(safari, animated: true)
+                } else if selectedItem == "문의하기" {
                     self.presentMailComposer()
                 }
             }.store(in: &subscriptions)
@@ -101,7 +105,7 @@ class SettingViewController: UIViewController {
             titleLabel.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
             
             sortTypeButton.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -25),
-            sortTypeButton.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
+            sortTypeButton.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor),
         ])
         
         sortTypeButton.showsMenuAsPrimaryAction = true
@@ -109,8 +113,11 @@ class SettingViewController: UIViewController {
     }
     
     private func configureServiceCell(cell: UICollectionViewListCell, item: SettingViewModel.Item) {
-        var content = cell.defaultContentConfiguration()
+        var content = UIListContentConfiguration.valueCell()
         content.text = item.title
+        if item.title == "버전 정보" {
+            content.secondaryText = "1.0.0"
+        }
         cell.contentConfiguration = content
     }
     
@@ -120,13 +127,6 @@ class SettingViewController: UIViewController {
         snapshot.appendItems(items, toSection: .sort)
         snapshot.appendItems(viewModel.serviceItems.value.map(SettingViewModel.Item.serviceItem), toSection: .service)
         dataSource.apply(snapshot, animatingDifferences: true)
-    }
-    
-    private func presentViewController() {
-        let storyboard = UIStoryboard(name: "AppInfo", bundle: nil)
-        let vc = storyboard.instantiateViewController(withIdentifier: "AppInfoViewController") as! AppInfoViewController
-        let navigationController = UINavigationController(rootViewController: vc)
-        self.navigationController?.present(navigationController, animated: true)
     }
     
     private func presentMailComposer() {

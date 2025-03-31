@@ -6,10 +6,11 @@
 //
 
 import Foundation
+import CoreData
 
 class SearchManager {
-    func filterItems<T: Searchable>(_ items: [T], with query: String) -> [T] {
+    func filterItems<T: NSManagedObject & TitleRepresentable>(_ items: [T], with query: String) -> [T] {
         guard !query.isEmpty else { return items }
-        return items.filter { $0.title.lowercased().contains(query.lowercased()) }
+        return items.filter { $0.contextTitle.lowercased().contains(query.lowercased()) }
     }
 }

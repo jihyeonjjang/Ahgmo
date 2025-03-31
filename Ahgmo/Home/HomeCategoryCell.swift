@@ -11,7 +11,7 @@ class HomeCategoryCell: UICollectionViewCell {
     
     @IBOutlet weak var titleLabel: UILabel!
     
-    func configure(item: CategoryData) {
+    func configure(item: Category) {
         titleLabel.text = item.title
         titleLabel.textColor = item.isSelected ? .systemBackground : .label
     }

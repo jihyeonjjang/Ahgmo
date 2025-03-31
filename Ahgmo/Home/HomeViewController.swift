@@ -23,7 +23,7 @@ class HomeViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel = HomeViewModel(categoryItems: CategoryData.list, infoItems: InfoData.list, filteredItems: InfoData.list)
+        viewModel = HomeViewModel()
         bind()
         configureNavigationItem()
         embedSearchControl()
@@ -62,7 +62,7 @@ class HomeViewController: UIViewController {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }
-                self.reloadSnapshot(section: HomeViewModel.Section.information)
+                self.reconfigureSnapshot(section: .information)
                 self.toolbarItems = self.isEditing ? self.editToolBarItem() : self.defaultToolBarItem()
             }.store(in: &subscriptions)
         
@@ -71,7 +71,8 @@ class HomeViewController: UIViewController {
             .sink { [weak self] items in
                 guard let self = self else { return }
                 let filteredHomeItems = items.map { HomeViewModel.Item.informationItem($0) }
-                self.applySearchSnapshot(searchItems: filteredHomeItems)
+                self.applyFilteredSnapshot(searchItems: filteredHomeItems)
+                reconfigureSnapshot(section: .category)
             }.store(in: &subscriptions)
     }
     
@@ -178,8 +179,7 @@ class HomeViewController: UIViewController {
         
         if !isEditing {
             viewModel.clearSelection()
-            // applySnapshot이 되어야할듯
-            collectionView.reloadData()
+//            reconfigureSnapshot(section: .information)
         }
         collectionView.isEditing = editing
     }
@@ -277,13 +277,14 @@ class HomeViewController: UIViewController {
         dataSource.apply(snapshot, animatingDifferences: false)
     }
     
-    private func reloadSnapshot(section: HomeViewModel.Section) {
+    private func reconfigureSnapshot(section: HomeViewModel.Section) {
         var snapshot = dataSource.snapshot()
-        snapshot.reloadSections([section])
+        let sectionItems = snapshot.itemIdentifiers(inSection: section)
+        snapshot.reconfigureItems(sectionItems)
         dataSource.apply(snapshot, animatingDifferences: false)
     }
     
-    private func applySearchSnapshot(searchItems: [HomeViewModel.Item]) {
+    private func applyFilteredSnapshot(searchItems: [HomeViewModel.Item]) {
         var snapshot = dataSource.snapshot()
         let existingItems = snapshot.itemIdentifiers(inSection: .information)
         snapshot.deleteItems(existingItems)
@@ -320,7 +321,7 @@ class HomeViewController: UIViewController {
         let storyboard = UIStoryboard(name: "DetailInfo", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "DetailInfoViewController") as! DetailInfoViewController
         if case .informationItem(let infoData) = item {
-            vc.viewModel = DetailInfoViewModel(infoItems: infoData)
+            vc.viewModel = DetailInfoViewModel(infoItem: infoData)
         }
         self.navigationController?.pushViewController(vc, animated: true)
     }
@@ -346,7 +347,7 @@ extension HomeViewController: UICollectionViewDelegate, UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         viewModel.filteredItems.value = searchManager.filterItems(viewModel.infoItems.value, with: searchText)
         let filteredHomeItems = viewModel.filteredItems.value.map { HomeViewModel.Item.informationItem($0) }
-        applySearchSnapshot(searchItems: filteredHomeItems)
+        applyFilteredSnapshot(searchItems: filteredHomeItems)
     }
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {

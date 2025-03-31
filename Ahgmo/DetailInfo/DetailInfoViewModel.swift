@@ -9,29 +9,33 @@ import Foundation
 import Combine
 
 final class DetailInfoViewModel {
-    let infoItems: CurrentValueSubject<InfoData, Never>
+    let infoItem: CurrentValueSubject<Information, Never>
     let selectedItem: CurrentValueSubject<URL?, Never>
     
-    init(infoItems: InfoData, selectedItem: URL? = nil) {
-        self.infoItems = CurrentValueSubject(infoItems)
+    init(infoItem: Information, selectedItem: URL? = nil) {
+        self.infoItem = CurrentValueSubject(infoItem)
         self.selectedItem = CurrentValueSubject(selectedItem)
     }
     
     enum Section: Int, CaseIterable {
-        case url
         case details
+        case url
         
         var title: String {
             switch self {
-            case .url: return "URL"
             case .details: return "설명"
+            case .url: return "URL"
             }
         }
     }
-    typealias Item = InfoData
+    
+    struct Item: Hashable {
+        let id = UUID()
+        let contentText: String
+    }
     
     func didSelect() {
-        guard let url = URL(string: infoItems.value.urlString) else {
+        guard let url = URL(string: infoItem.value.urlString!) else {
             return
         }
         selectedItem.send(url)

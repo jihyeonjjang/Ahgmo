@@ -9,36 +9,19 @@ import UIKit
 import Combine
 
 class SelectCategoryViewController: UIViewController {
-    enum ViewSource {
-        case editInfo(selectedCategory: CategoryData?)
-        case normal
-    }
-    
-    init(viewSource: ViewSource = .normal) {
-        self.viewSource = viewSource
-        super.init(nibName: nil, bundle: nil)
-    }
-    
-    required init?(coder: NSCoder) {
-        self.viewSource = .normal
-        super.init(coder: coder)
-    }
-    
     var subscriptions = Set<AnyCancellable>()
     var viewModel: SelectCategoryViewModel!
     
-    var filteredItems: [CategoryData] = []
+    var filteredItems: [Category] = []
     let searchManager = SearchManager()
     
-    var viewSource: ViewSource
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<SelectCategoryViewModel.Section, SelectCategoryViewModel.Item>!
     
-    var completion: ((CategoryData) -> Void)?
+    var completion: ((Category) -> Void)?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel = SelectCategoryViewModel(categoryItems: CategoryData.list)
         bind()
         configureNavigationItem()
         embedSearchControl()
@@ -46,7 +29,6 @@ class SelectCategoryViewController: UIViewController {
     }
     
     private func bind() {
-        // input
         viewModel.categoryItems
             .receive(on: RunLoop.main)
             .sink { [weak self] list in
@@ -131,9 +113,7 @@ class SelectCategoryViewController: UIViewController {
             content.text = item.title
             cell.contentConfiguration = content
             
-            if case let .editInfo(selectedCategory) = self.viewSource,
-               let selected = selectedCategory,
-               selected.title == item.title {
+            if let selected = viewModel.initialCategory.value, selected.title == item.title {
                 cell.accessories = [.checkmark()]
             } else {
                 cell.accessories = []
@@ -145,7 +125,7 @@ class SelectCategoryViewController: UIViewController {
         }
     }
     
-    private func applySnapshot(_ items: [CategoryData]) {
+    private func applySnapshot(_ items: [Category]) {
         var snapshot = NSDiffableDataSourceSnapshot<SelectCategoryViewModel.Section, SelectCategoryViewModel.Item>()
         snapshot.appendSections([.main])
         snapshot.appendItems(items, toSection: .main)
@@ -165,9 +145,8 @@ extension SelectCategoryViewController: UICollectionViewDelegate, UISearchBarDel
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
         if let item = dataSource.itemIdentifier(for: indexPath) {
-            viewModel.didSelect(id: item.id)
+            viewModel.didSelect(id: item.id!)
         }
-        self.dismiss(animated: true)
     }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
@@ -183,8 +162,4 @@ extension SelectCategoryViewController: UICollectionViewDelegate, UISearchBarDel
         filteredItems = viewModel.categoryItems.value
         applySnapshot(viewModel.categoryItems.value)
     }
-}
-
-extension Notification.Name {
-    static let didSelectCategory = Notification.Name("didSelectCategory")
 }

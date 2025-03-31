@@ -7,22 +7,34 @@
 
 import Foundation
 import Combine
+import CoreData
 
 final class HomeViewModel {
-    let categoryItems: CurrentValueSubject<[CategoryData], Never>
-    let infoItems: CurrentValueSubject<[InfoData], Never>
-    var filteredItems: CurrentValueSubject<[InfoData], Never>
-    var selectedInfo: CurrentValueSubject<InfoData?, Never>
-    var selectedItems: CurrentValueSubject<Set<InfoData>, Never>
+    let categoryItems: CurrentValueSubject<[Category], Never>
+    let infoItems: CurrentValueSubject<[Information], Never>
+    var filteredItems: CurrentValueSubject<[Information], Never>
+    var selectedInfo: CurrentValueSubject<Information?, Never>
+    var selectedItems: CurrentValueSubject<Set<Information>, Never>
     var isSelectAll: CurrentValueSubject<Bool, Never>
     
-    init(categoryItems: [CategoryData], infoItems: [InfoData], filteredItems: [InfoData], selectedInfo: InfoData? = nil) {
-        self.categoryItems = CurrentValueSubject(categoryItems)
-        self.infoItems = CurrentValueSubject(infoItems)
-        self.filteredItems = CurrentValueSubject(filteredItems)
+    init(selectedInfo: Information? = nil) {
+        self.categoryItems = CurrentValueSubject([])
+        self.infoItems = CurrentValueSubject([])
+        self.filteredItems = CurrentValueSubject([])
         self.selectedInfo = CurrentValueSubject(selectedInfo)
         self.selectedItems = CurrentValueSubject([])
         self.isSelectAll = CurrentValueSubject(false)
+        fetchDatas()
+    }
+    
+    private func fetchDatas() {
+        let categoryFetchRequest = NSFetchRequest<Category>(entityName: "Category")
+        let informationsFetchRequest = NSFetchRequest<Information>(entityName: "Information")
+        
+        self.categoryItems.value = CoreDataManager.shared.fetchContext(request: categoryFetchRequest)
+        let informations = CoreDataManager.shared.fetchContext(request: informationsFetchRequest)
+        self.infoItems.value = informations
+        self.filteredItems.value = informations
     }
     
     enum Section: Int, CaseIterable {
@@ -31,24 +43,24 @@ final class HomeViewModel {
     }
     
     enum Item: Hashable {
-        case categoryItem(CategoryData)
-        case informationItem(InfoData)
+        case categoryItem(Category)
+        case informationItem(Information)
         
         var title: String {
             switch self {
             case .categoryItem(let data):
-                return data.title
+                return data.title!
             case .informationItem(let data):
-                return data.title
+                return data.title!
             }
         }
         
         var id: UUID {
             switch self {
             case .categoryItem(let data):
-                return data.id
+                return data.id!
             case .informationItem(let data):
-                return data.id
+                return data.id!
             }
         }
     }
@@ -63,7 +75,7 @@ final class HomeViewModel {
                 filteredItems.send(infoItems.value)
             } else {
                 let selectedCategory = categoryItems.value[categoryIndex]
-                let filteredInfos = infoItems.value.filter { $0.category.title == selectedCategory.title }
+                let filteredInfos = infoItems.value.filter { $0.categoryItem?.title == selectedCategory.title }
                 filteredItems.send(filteredInfos)
             }
         }
@@ -75,7 +87,7 @@ final class HomeViewModel {
         }
     }
     
-    func toggleItemSelection(_ item: InfoData) {
+    func toggleItemSelection(_ item: Information) {
         var currentItems = selectedItems.value
         if currentItems.contains(item) {
             currentItems.remove(item)

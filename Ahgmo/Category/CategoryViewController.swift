@@ -12,7 +12,7 @@ class CategoryViewController: UIViewController {
     var subscriptions = Set<AnyCancellable>()
     var viewModel: CategoryViewModel!
     
-    var filteredItems: [CategoryData] = []
+    var filteredItems: [Category] = []
     let searchManager = SearchManager()
     
     var collectionView: UICollectionView!
@@ -26,7 +26,7 @@ class CategoryViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel = CategoryViewModel(categoryItems: CategoryData.list)
+        viewModel = CategoryViewModel()
         bind()
         configureNavigationItem()
         embedSearchControl()
@@ -137,7 +137,7 @@ class CategoryViewController: UIViewController {
         let deleteAction = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
             if let indexPath = self?.dataSource.indexPath(for: item),
                let item = self?.dataSource.itemIdentifier(for: indexPath) {
-                self?.viewModel.deleteItem(id: item.id)
+                self?.viewModel.deleteItem(id: item.id!)
             }
             self?.isEditing = false
             // UI 업데이트
@@ -185,7 +185,7 @@ class CategoryViewController: UIViewController {
 extension CategoryViewController: UICollectionViewDelegate, UISearchBarDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         if let item = dataSource.itemIdentifier(for: indexPath) {
-            viewModel.didSelect(id: item.id)
+            viewModel.didSelect(id: item.id!)
         }
         collectionView.deselectItem(at: indexPath, animated: true)
     }

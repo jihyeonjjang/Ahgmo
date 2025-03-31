@@ -23,7 +23,7 @@ class AddInfoViewController: UIViewController {
     var subscriptions = Set<AnyCancellable>()
     let didSelect = PassthroughSubject<Void, Never>()
     let keyboardWillHide = PassthroughSubject<Void, Never>()
-    var selectedCategory: CategoryData = CategoryData(title: "")
+    var selectedCategory: Category?
     
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
@@ -48,15 +48,6 @@ class AddInfoViewController: UIViewController {
             .receive(on: RunLoop.main)
             .sink { [unowned self] _ in
                 self.view.endEditing(true)
-            }
-            .store(in: &subscriptions)
-        
-        NotificationCenter.default
-            .publisher(for: .didSelectCategory)
-            .compactMap { $0.object as? CategoryData }
-            .receive(on: RunLoop.main)
-            .sink { [weak self] category in
-                self?.selectedCategory = category
             }
             .store(in: &subscriptions)
     }
@@ -123,12 +114,10 @@ class AddInfoViewController: UIViewController {
                     textField.trailingAnchor.constraint(equalTo: cell.contentView.trailingAnchor, constant: -10),
                     textField.centerYAnchor.constraint(equalTo: cell.contentView.centerYAnchor)
                 ])
-                
-                
             } else {
                 var content = UIListContentConfiguration.valueCell()
                 content.text = item.title
-                content.secondaryText = self.selectedCategory.title
+                content.secondaryText = self.selectedCategory?.title
                 cell.contentConfiguration = content
                 cell.accessories = [.disclosureIndicator()]
             }
@@ -158,7 +147,7 @@ class AddInfoViewController: UIViewController {
     private func presentViewController() {
         let storyboard = UIStoryboard(name: "SelectCategory", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "SelectCategoryViewController") as! SelectCategoryViewController
-        vc.viewSource = .normal
+        vc.viewModel = SelectCategoryViewModel(initialCategory: selectedCategory)
         vc.completion = { [weak self] category in
             self?.selectedCategory = category
             self?.updateSnapshot(section: .button)

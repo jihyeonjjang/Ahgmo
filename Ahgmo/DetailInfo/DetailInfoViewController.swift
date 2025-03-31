@@ -31,7 +31,7 @@ class DetailInfoViewController: UIViewController {
     }
     
     private func bind() {
-        viewModel.infoItems
+        viewModel.infoItem
             .receive(on: RunLoop.main)
             .sink { [weak self] data in
                 self?.applySnapshot(data)
@@ -68,7 +68,7 @@ class DetailInfoViewController: UIViewController {
     @objc private func navigateToPage(_ sender: UIBarButtonItem) {
         let storyboard = UIStoryboard(name: "EditInfo", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "EditInfoViewController") as! EditInfoViewController
-        vc.viewModel = EditInfoViewModel(infoItems: self.viewModel.infoItems.value)
+        vc.viewModel = EditInfoViewModel(infoItem: self.viewModel.infoItem.value)
         let navigationController = UINavigationController(rootViewController: vc)
         self.navigationController?.present(navigationController, animated: true)
     }
@@ -98,12 +98,7 @@ class DetailInfoViewController: UIViewController {
         
         let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, DetailInfoViewModel.Item> { cell, indexPath, item in
             var content = UIListContentConfiguration.cell()
-            let section = DetailInfoViewModel.Section(rawValue: indexPath.section)
-            if section == .url {
-                content.text = item.urlString
-            } else {
-                content.text = item.details
-            }
+            content.text = item.contentText
             cell.contentConfiguration = content
         }
         
@@ -122,22 +117,26 @@ class DetailInfoViewController: UIViewController {
         collectionView.delegate = self
     }
     
-    private func applySnapshot(_ items: InfoData) {
+    private func applySnapshot(_ items: Information) {
         var snapshot = NSDiffableDataSourceSnapshot<DetailInfoViewModel.Section, DetailInfoViewModel.Item>()
         snapshot.appendSections(DetailInfoViewModel.Section.allCases)
-        snapshot.appendItems([InfoData(title: items.title, details: "", urlString: items.urlString, imageURL: "", category: CategoryData(title: ""))], toSection: .url)
-        snapshot.appendItems([InfoData(title: items.title, details: items.details, urlString: "", imageURL: "", category: CategoryData(title: ""))], toSection: .details)
+        
+        let items = viewModel.infoItem.value
+        let urlItem = DetailInfoViewModel.Item(contentText: items.urlString ?? "error")
+        let detailItem = DetailInfoViewModel.Item(contentText: items.details ?? "error")
+        snapshot.appendItems([detailItem], toSection: .details)
+        snapshot.appendItems([urlItem], toSection: .url)
         dataSource.apply(snapshot)
     }
     
     private func updateUI() {
         thumbnailImageView.kf.setImage(
-            with: URL(string: self.viewModel.infoItems.value.imageURL)!,
+            with: URL(string: self.viewModel.infoItem.value.imageURL!)!,
             placeholder: UIImage(systemName: "hands.sparkles.fill"))
         thumbnailImageView.layer.cornerRadius = 20
         
-        titleLabel.text = self.viewModel.infoItems.value.title
-        categoryLabel.text = self.viewModel.infoItems.value.category.title
+        titleLabel.text = self.viewModel.infoItem.value.title
+        categoryLabel.text = self.viewModel.infoItem.value.categoryItem!.title
     }
     
     private func layout() -> UICollectionViewCompositionalLayout {

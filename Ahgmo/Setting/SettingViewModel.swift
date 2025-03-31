@@ -7,16 +7,23 @@
 
 import Foundation
 import Combine
+import CoreData
 
 final class SettingViewModel {
     let sortingItems: CurrentValueSubject<[SortType], Never>
     let serviceItems: CurrentValueSubject<[String], Never>
     let selectedItem: CurrentValueSubject<String?, Never>
     
-    init(sortingItems: [SortType], serviceItems: [String], selectedItem: String? = nil) {
-        self.sortingItems = CurrentValueSubject(sortingItems)
+    init(serviceItems: [String], selectedItem: String? = nil) {
+        self.sortingItems = CurrentValueSubject([])
         self.serviceItems = CurrentValueSubject(serviceItems)
         self.selectedItem = CurrentValueSubject(selectedItem)
+        fetchSortTypes()
+    }
+    
+    private func fetchSortTypes() {
+        let sortTypeFetchRequest = NSFetchRequest<SortType>(entityName: "SortType")
+        self.sortingItems.value = CoreDataManager.shared.fetchContext(request: sortTypeFetchRequest)
     }
     
     enum Section: Int, CaseIterable {
@@ -31,7 +38,7 @@ final class SettingViewModel {
         var title: String {
             switch self {
             case .sortingItem(let sortType):
-                return sortType.title
+                return sortType.title!
             case .serviceItem(let serviceName):
                 return serviceName
             }

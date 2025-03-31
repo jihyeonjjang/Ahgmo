@@ -7,21 +7,28 @@
 
 import Foundation
 import Combine
+import CoreData
 
 final class CategoryViewModel {
-    let categoryItems: CurrentValueSubject<[CategoryData], Never>
-    let selectedItem: CurrentValueSubject<CategoryData?, Never>
+    let categoryItems: CurrentValueSubject<[Category], Never>
+    let selectedItem: CurrentValueSubject<Category?, Never>
     
-    init(categoryItems: [CategoryData], selectedItem: CategoryData? = nil) {
-        self.categoryItems = CurrentValueSubject(categoryItems)
+    init(selectedItem: Category? = nil) {
+        self.categoryItems = CurrentValueSubject([])
         self.selectedItem = CurrentValueSubject(selectedItem)
+        fetchCategories()
+    }
+    
+    private func fetchCategories() {
+        let categoryFetchRequest = NSFetchRequest<Category>(entityName: "Category")
+        self.categoryItems.value = CoreDataManager.shared.fetchContext(request: categoryFetchRequest)
     }
     
     enum Section {
         case main
     }
-    typealias Item = CategoryData
-
+    typealias Item = Category
+    
     func didSelect(id: UUID) {
         if let category = categoryItems.value.first(where: { $0.id == id }) {
             selectedItem.send(category)
@@ -30,6 +37,5 @@ final class CategoryViewModel {
     
     func deleteItem(id: UUID) {
         // 삭제
-        //        viewModel.categoryItems.remove(at: indexPath.item)
     }
 }

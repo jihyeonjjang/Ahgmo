@@ -91,10 +91,10 @@ class EditCategoryViewController: UIViewController {
         }
     }
     
-    private func applySnapshot(_ items: CategoryData) {
+    private func applySnapshot(_ items: EditCategoryViewModel.Item) {
         var snapshot = NSDiffableDataSourceSnapshot<EditCategoryViewModel.Section, EditCategoryViewModel.Item>()
         snapshot.appendSections([.main])
-        snapshot.appendItems([CategoryData(title: items.title)], toSection: .main)
+        snapshot.appendItems([items], toSection: .main)
         dataSource.apply(snapshot, animatingDifferences: false)
     }
 
