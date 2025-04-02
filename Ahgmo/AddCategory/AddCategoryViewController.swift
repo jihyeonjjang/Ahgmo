@@ -10,12 +10,6 @@ import Combine
 
 class AddCategoryViewController: UIViewController {
     var originView: String?
-    
-    //    enum Section {
-    //        case main
-    //    }
-    //    typealias Item = String
-    
     var subscriptions = Set<AnyCancellable>()
     let keyboardWillHide = PassthroughSubject<Void, Never>()
     var viewModel: AddCategoryViewModel!
@@ -25,6 +19,7 @@ class AddCategoryViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        viewModel = AddCategoryViewModel()
         bind()
         configureNavigationItem()
         configureColelctionView()
@@ -72,7 +67,7 @@ class AddCategoryViewController: UIViewController {
         case 0:
             self.dismiss(animated: true, completion: nil)
         case 1:
-            // 완료
+            viewModel.saveCategory()
             self.dismiss(animated: true, completion: nil)
         default:
             return
@@ -135,5 +130,9 @@ class AddCategoryViewController: UIViewController {
 extension AddCategoryViewController: UICollectionViewDelegate, UITextFieldDelegate, UIGestureRecognizerDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
+    }
+    
+    func textFieldDidChangeSelection(_ textField: UITextField) {
+            viewModel.userInput.send(textField.text ?? "")
     }
 }
