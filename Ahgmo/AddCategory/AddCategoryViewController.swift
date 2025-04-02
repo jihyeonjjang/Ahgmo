@@ -11,16 +11,17 @@ import Combine
 class AddCategoryViewController: UIViewController {
     var originView: String?
     
-    enum Section {
-        case main
-    }
-    typealias Item = String
+    //    enum Section {
+    //        case main
+    //    }
+    //    typealias Item = String
     
     var subscriptions = Set<AnyCancellable>()
     let keyboardWillHide = PassthroughSubject<Void, Never>()
+    var viewModel: AddCategoryViewModel!
     
     var collectionView: UICollectionView!
-    var dataSource: UICollectionViewDiffableDataSource<Section, Item>!
+    var dataSource: UICollectionViewDiffableDataSource<AddCategoryViewModel.Section, AddCategoryViewModel.Item>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -87,7 +88,7 @@ class AddCategoryViewController: UIViewController {
         collectionView.keyboardDismissMode = .interactive
         collectionView.delegate = self
         
-        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, Item> { cell, indexPath, item in
+        let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, AddCategoryViewModel.Item> { cell, indexPath, item in
             let textField = UITextField()
             textField.placeholder = item
             textField.clearButtonMode = .whileEditing
@@ -104,11 +105,11 @@ class AddCategoryViewController: UIViewController {
             ])
         }
         
-        dataSource = UICollectionViewDiffableDataSource<Section, Item>(collectionView: collectionView) { collectionView, indexPath, item in
+        dataSource = UICollectionViewDiffableDataSource<AddCategoryViewModel.Section, AddCategoryViewModel.Item>(collectionView: collectionView) { collectionView, indexPath, item in
             return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
         }
         
-        var snapshot = NSDiffableDataSourceSnapshot<Section, Item>()
+        var snapshot = NSDiffableDataSourceSnapshot<AddCategoryViewModel.Section, AddCategoryViewModel.Item>()
         snapshot.appendSections([.main])
         snapshot.appendItems(["카테고리 이름"])
         dataSource.apply(snapshot, animatingDifferences: false)
