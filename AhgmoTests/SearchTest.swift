@@ -37,8 +37,8 @@ final class SearchTest: XCTestCase {
         
         let result = searchManager.filterItems(items, with: "로제파스타 레시피")
         
-        XCTAssertEqual(result.count, 1)
-        XCTAssertEqual(result.first?.title, "로제파스타 레시피")
+        XCTAssertEqual(result.count, 1, "count error")
+        XCTAssertEqual(result.first?.title, "로제파스타 레시피", "title error")
     }
     
     func testFilterItemsWithCategoryData() throws {
@@ -47,8 +47,8 @@ final class SearchTest: XCTestCase {
         
         let result = searchManager.filterItems(items, with: "코스트코")
         
-        XCTAssertEqual(result.count, 1)
-        XCTAssertEqual(result.first?.title, "코스트코")
+        XCTAssertEqual(result.count, 1, "count error")
+        XCTAssertEqual(result.first?.title, "코스트코", "title error")
     }
     
     func testFilterItemsWithEmptyQuery() throws {
@@ -57,7 +57,7 @@ final class SearchTest: XCTestCase {
         
         let result = searchManager.filterItems(items, with: "")
         
-        XCTAssertEqual(result.count, items.count)
+        XCTAssertEqual(result.count, items.count, "count error")
     }
     
     func testFilterItemsWithNoMatch() throws {
@@ -66,7 +66,7 @@ final class SearchTest: XCTestCase {
         
         let result = searchManager.filterItems(items, with: "파스타 레시피")
         
-        XCTAssertEqual(result.count, 0)
+        XCTAssertEqual(result.count, 0, "count error")
     }
     
 //    func testFilterItems_CaseInsensitive() throws {

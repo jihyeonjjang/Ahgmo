@@ -23,10 +23,10 @@ final class CategoryFilterTest: XCTestCase {
             
             firstACell.tap()
             
-            XCTAssertTrue(firstBCell.exists, "B cell이 존재하지 않습니다.")
+            XCTAssertTrue(firstBCell.exists, "exist error")
             
             let filteredBCellLabel = firstBCell.staticTexts.element.label
-            XCTAssertEqual(filteredBCellLabel, "로제파스타 레시피", "B cell의 필터링된 값이 예상과 다릅니다.")
+            XCTAssertEqual(filteredBCellLabel, "로제파스타 레시피", "expected value error")
         }
     }
 }

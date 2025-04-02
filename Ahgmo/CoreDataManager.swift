@@ -88,7 +88,7 @@ final class CoreDataManager {
             let fetchResult = try self.context.fetch(request)
             return fetchResult
         } catch let error {
-            print("데이터 불러오기 실패: \(error.localizedDescription)")
+            print("data fetch error: \(error.localizedDescription)")
             return []
         }
     }
@@ -101,7 +101,7 @@ final class CoreDataManager {
             try self.context.save()
             return true
         } catch let error {
-            print("데이터 삭제 실패: \(error.localizedDescription)")
+            print("data delete error: \(error.localizedDescription)")
             return false
         }
     }
@@ -119,11 +119,11 @@ final class CoreDataManager {
             let existingSortTypes = try context.fetch(sortTypeFetchRequest)
             
             if !existingCategories.isEmpty || !existingInfo.isEmpty || !existingSortTypes.isEmpty {
-                print("⚠️ Mock data가 이미 존재하여 삽입하지 않음")
+                print("already exists")
                 return
             }
         } catch {
-            print("데이터 체크 중 오류 발생: \(error)")
+            print("data existence check error: \(error)")
         }
         
         let category1 = CategoryEntity(context: context)
@@ -210,9 +210,9 @@ final class CoreDataManager {
         
         do {
             try context.save()
-            print("Mock data 삽입 완료!")
+            print("Mock data")
         } catch {
-            print("Mock data 삽입 실패: \(error)")
+            print("Mock data error: \(error)")
         }
     }
 }
