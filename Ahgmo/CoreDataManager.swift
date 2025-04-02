@@ -15,6 +15,13 @@ final class CoreDataManager {
     
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "Ahgmo")
+        
+        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
+            let description = NSPersistentStoreDescription()
+            description.type = NSInMemoryStoreType
+            container.persistentStoreDescriptions = [description]
+        }
+        
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
                 fatalError("Unresolved error \(error), \(error.userInfo)")
@@ -107,7 +114,11 @@ final class CoreDataManager {
     }
     
     func insertMockData() {
-        let context = persistentContainer.viewContext
+        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
+            return
+        }
+        
+        let context = self.context
         
         let categoryFetchRequest: NSFetchRequest<CategoryEntity> = CategoryEntity.fetchRequest()
         let infoFetchRequest: NSFetchRequest<InfoEntity> = InfoEntity.fetchRequest()
