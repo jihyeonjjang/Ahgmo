@@ -37,14 +37,16 @@ class CategoryViewController: UIViewController {
         viewModel.categoryItems
             .receive(on: RunLoop.main)
             .sink { [weak self] data in
-                self?.applySnapshot(data)
+                guard let self = self else { return }
+                self.applySnapshot(data)
             }.store(in: &subscriptions)
         
         viewModel.selectedItem
             .compactMap { $0 }
             .receive(on: RunLoop.main)
             .sink { [weak self] selectedItem in
-                self?.presentViewController(item: selectedItem)
+                guard let self = self else { return }
+                self.presentViewController(item: selectedItem)
             }.store(in: &subscriptions)
     }
     
@@ -118,7 +120,8 @@ class CategoryViewController: UIViewController {
             
             let accessories: [UICellAccessory] = [
                 .delete(displayed: .whenEditing, actionHandler: { [weak self] in
-                    self?.deleteItem(item)
+                    guard let self = self else { return }
+                    self.deleteItem(item)
                 })
             ]
             
@@ -135,11 +138,12 @@ class CategoryViewController: UIViewController {
         
         let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
         let deleteAction = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
-            if let indexPath = self?.dataSource.indexPath(for: item),
-               let item = self?.dataSource.itemIdentifier(for: indexPath) {
-                self?.viewModel.deleteItem(id: item.id!)
+            guard let self = self else { return }
+            if let indexPath = self.dataSource.indexPath(for: item),
+               let item = self.dataSource.itemIdentifier(for: indexPath) {
+                self.viewModel.deleteItem(id: item.id!)
             }
-            self?.isEditing = false
+            self.isEditing = false
             // UI 업데이트
         }
         

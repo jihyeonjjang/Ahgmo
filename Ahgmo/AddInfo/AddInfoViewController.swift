@@ -41,12 +41,14 @@ class AddInfoViewController: UIViewController {
         didSelect
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                self?.presentViewController()
+                guard let self = self else { return }
+                self.presentViewController()
             }.store(in: &subscriptions)
         
         keyboardWillHide
             .receive(on: RunLoop.main)
-            .sink { [unowned self] _ in
+            .sink { [weak self] _ in
+                guard let self = self else { return }
                 self.view.endEditing(true)
             }
             .store(in: &subscriptions)
@@ -149,8 +151,9 @@ class AddInfoViewController: UIViewController {
         let vc = storyboard.instantiateViewController(withIdentifier: "SelectCategoryViewController") as! SelectCategoryViewController
         vc.viewModel = SelectCategoryViewModel(initialCategory: selectedCategory)
         vc.completion = { [weak self] category in
-            self?.selectedCategory = category
-            self?.updateSnapshot(section: .button)
+            guard let self = self else { return }
+            self.selectedCategory = category
+            self.updateSnapshot(section: .button)
         }
         let navigationController = UINavigationController(rootViewController: vc)
         

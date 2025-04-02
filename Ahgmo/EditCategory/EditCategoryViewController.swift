@@ -28,14 +28,16 @@ class EditCategoryViewController: UIViewController {
         keyboardWillHide
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                self?.view.endEditing(true)
+                guard let self = self else { return }
+                self.view.endEditing(true)
             }
             .store(in: &subscriptions)
         
         viewModel.categoryItems
             .receive(on: RunLoop.main)
             .sink { [weak self] data in
-                self?.applySnapshot(data)
+                guard let self = self else { return }
+                self.applySnapshot(data)
             }.store(in: &subscriptions)
     }
     

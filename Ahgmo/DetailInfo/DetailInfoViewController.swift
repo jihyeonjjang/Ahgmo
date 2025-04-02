@@ -34,15 +34,17 @@ class DetailInfoViewController: UIViewController {
         viewModel.infoItem
             .receive(on: RunLoop.main)
             .sink { [weak self] data in
-                self?.applySnapshot(data)
+                guard let self = self else { return }
+                self.applySnapshot(data)
             }.store(in: &subscriptions)
         
         viewModel.selectedItem
             .compactMap { $0 }
             .receive(on: RunLoop.main)
             .sink { [weak self] url in
+                guard let self = self else { return }
                 let safari = SFSafariViewController(url: url)
-                self?.present(safari, animated: true)
+                self.present(safari, animated: true)
             }.store(in: &subscriptions)
     }
     
@@ -78,7 +80,8 @@ class DetailInfoViewController: UIViewController {
         
         let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
         let deleteAction = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
-            self?.viewModel.deleteItem()
+            guard let self = self else { return }
+            self.viewModel.deleteItem()
             // UI 업데이트
         }
         

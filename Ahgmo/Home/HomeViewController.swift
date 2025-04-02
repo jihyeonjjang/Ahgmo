@@ -193,8 +193,9 @@ class HomeViewController: UIViewController {
         
         let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
         let deleteAction = UIAlertAction(title: "삭제", style: .destructive) { [weak self] _ in
-            self?.viewModel.deleteItems()
-            self?.isEditing = false
+            guard let self = self else { return }
+            self.viewModel.deleteItems()
+            self.isEditing = false
             
             // UI 업데이트
         }

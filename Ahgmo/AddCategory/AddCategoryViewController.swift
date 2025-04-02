@@ -34,7 +34,8 @@ class AddCategoryViewController: UIViewController {
     private func bind() {
         keyboardWillHide
             .receive(on: RunLoop.main)
-            .sink { [unowned self] _ in
+            .sink { [weak self] _ in
+                guard let self = self else { return }
                 self.view.endEditing(true)
             }
             .store(in: &subscriptions)

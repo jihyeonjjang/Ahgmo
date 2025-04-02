@@ -32,15 +32,17 @@ class SelectCategoryViewController: UIViewController {
         viewModel.categoryItems
             .receive(on: RunLoop.main)
             .sink { [weak self] list in
-                self?.applySnapshot(list)
+                guard let self = self else { return }
+                self.applySnapshot(list)
             }.store(in: &subscriptions)
         
         viewModel.selectedItem
             .compactMap { $0 }
             .receive(on: RunLoop.main)
             .sink { [weak self] item in
-                self?.completion?(item)
-                self?.dismiss(animated: true, completion: nil)
+                guard let self = self else { return }
+                self.completion?(item)
+                self.dismiss(animated: true, completion: nil)
             }.store(in: &subscriptions)
     }
     
@@ -108,7 +110,6 @@ class SelectCategoryViewController: UIViewController {
         
         let cellRegistration = UICollectionView.CellRegistration<UICollectionViewListCell, SelectCategoryViewModel.Item> { [weak self] cell, indexPath, item in
             guard let self = self else { return }
-            
             var content = UIListContentConfiguration.cell()
             content.text = item.title
             cell.contentConfiguration = content
