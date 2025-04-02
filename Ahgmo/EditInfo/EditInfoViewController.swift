@@ -7,7 +7,6 @@
 
 import UIKit
 import Combine
-import CoreData
 
 class EditInfoViewController: UIViewController {
     //    private let ogpFetcher = OGPFetcher()

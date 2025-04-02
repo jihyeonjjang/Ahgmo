@@ -8,7 +8,6 @@
 import UIKit
 import Combine
 import MessageUI
-import CoreData
 import SafariServices
 
 class SettingViewController: UIViewController {
