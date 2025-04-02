@@ -47,46 +47,60 @@ final class CoreDataManager {
     }
     
     @discardableResult
-    func saveInfo(information: InfoEntity) -> Bool {
-        let entity = NSEntityDescription.entity(forEntityName: "InfoEntity", in: self.context)
-        if let entity = entity {
-            let managedObject = NSManagedObject(entity: entity, insertInto: self.context)
-            managedObject.setValue(information.title, forKey: "title")
-            managedObject.setValue(information.details, forKey: "details")
-            managedObject.setValue(information.urlString, forKey: "urlString")
-            managedObject.setValue(information.imageURL, forKey: "imageURL")
-            
-            do {
-                try self.context.save()
-                print("저장완료: \(managedObject)")
-                return true
-            } catch let error {
-                print("데이터 저장 실패: \(error.localizedDescription)")
-                return false
-            }
-        } else {
-            return false
-        }
-    }
-    
-    @discardableResult
-    func saveCategory(category: CategoryEntity) -> Bool {
+    func saveCategory(title: String, isSelected: Bool) -> UUID? {
         let entity = NSEntityDescription.entity(forEntityName: "CategoryEntity", in: self.context)
         if let entity = entity {
             let managedObject = NSManagedObject(entity: entity, insertInto: self.context)
-            managedObject.setValue(category.title, forKey: "title")
-            managedObject.setValue(category.isSelected, forKey: "isSelected")
+            let id = UUID()
+            managedObject.setValue(id, forKey: "id")
+            managedObject.setValue(title, forKey: "title")
+            managedObject.setValue(isSelected, forKey: "isSelected")
             
             do {
                 try self.context.save()
-                print("저장완료: \(managedObject)")
-                return true
+                print("category save: \(managedObject)")
+                return id
             } catch let error {
-                print("데이터 저장 실패: \(error.localizedDescription)")
-                return false
+                print("category save error: \(error.localizedDescription)")
+                return nil
             }
         } else {
-            return false
+            return nil
+        }
+    }
+    
+    func fetchCategory(by id: UUID) -> CategoryEntity? {
+        let fetchRequest: NSFetchRequest<CategoryEntity> = CategoryEntity.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+
+        return try? self.context.fetch(fetchRequest).first
+    }
+    
+    @discardableResult
+    func saveInfo(title: String, details: String?, urlString: String, imageURL: String?, categoryID: UUID) -> UUID? {
+        let entity = NSEntityDescription.entity(forEntityName: "InfoEntity", in: self.context)
+        if let entity = entity {
+            let managedObject = NSManagedObject(entity: entity, insertInto: self.context)
+            let id = UUID()
+            managedObject.setValue(id, forKey: "id")
+            managedObject.setValue(title, forKey: "title")
+            managedObject.setValue(details, forKey: "details")
+            managedObject.setValue(urlString, forKey: "urlString")
+            managedObject.setValue(imageURL, forKey: "imageURL")
+            if let category = CoreDataManager.shared.fetchCategory(by: categoryID) {
+                managedObject.setValue(category, forKey: "categoryItem")
+            }
+            
+            do {
+                try self.context.save()
+                print("information save: \(managedObject)")
+                return id
+            } catch let error {
+                print("info data save error: \(error.localizedDescription)")
+                return nil
+            }
+        } else {
+            return nil
         }
     }
     
