@@ -103,7 +103,7 @@ class HomeViewController: UIViewController {
         
         let numberInfoLabel = UIBarButtonItem(customView: {
             let label = UILabel()
-            label.text = "\(viewModel.infoItems.value.count)개의 항목"
+            label.text = "\(viewModel.itemsCount)개의 항목"
             return label
         }())
         

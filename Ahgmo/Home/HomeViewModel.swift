@@ -168,6 +168,10 @@ final class HomeViewModel: NSObject, NSFetchedResultsControllerDelegate  {
         isSelectAll.send(false)
     }
     
+    var itemsCount: Int {
+        filteredItems.value.count
+    }
+    
     var selectedItemsCount: Int {
         selectedItems.value.count
     }
