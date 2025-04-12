@@ -64,7 +64,7 @@ final class HomeViewModel {
             }
         }
     }
-    
+
     func didCategorySelect(id: UUID) {
         if let categoryIndex = categoryItems.value.firstIndex(where: { $0.id == id }) {
             categoryItems.value[categoryIndex].isSelected.toggle()

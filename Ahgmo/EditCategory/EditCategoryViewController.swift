@@ -33,7 +33,7 @@ class EditCategoryViewController: UIViewController {
             }
             .store(in: &subscriptions)
         
-        viewModel.categoryItems
+        viewModel.categoryItem
             .receive(on: RunLoop.main)
             .sink { [weak self] data in
                 guard let self = self else { return }
@@ -74,7 +74,7 @@ class EditCategoryViewController: UIViewController {
             let textField = UITextField()
             textField.placeholder = "카테고리 이름"
             textField.clearButtonMode = .always
-            textField.text = self.viewModel.categoryItems.value.title
+            textField.text = self.viewModel.categoryItem.value?.title
             textField.frame = CGRect(x: 0, y: 0, width: cell.bounds.width, height: cell.bounds.height)
             textField.delegate = self
             

@@ -42,7 +42,7 @@ class HomeViewController: UIViewController {
                 guard let self = self else { return }
                 var items: [HomeViewModel.Section: [HomeViewModel.Item]] = [:]
                 items[.category] = categories.map { HomeViewModel.Item.categoryItem($0) }
-                items[.information] = infos.map { HomeViewModel.Item.informationItem($0) }
+                items[.info] = infos.map { HomeViewModel.Item.infoItem($0) }
                 self.applySnapshot(items)
             }.store(in: &subscriptions)
         
@@ -54,7 +54,7 @@ class HomeViewController: UIViewController {
                 if self.isEditing {
                     self.viewModel.toggleItemSelection(selectedItem)
                 } else {
-                    self.presentViewController(item: .informationItem(selectedItem))
+                    self.presentViewController(item: .infoItem(selectedItem))
                 }
             }.store(in: &subscriptions)
         
@@ -62,7 +62,7 @@ class HomeViewController: UIViewController {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 guard let self = self else { return }
-                self.reconfigureSnapshot(section: .information)
+                self.reconfigureSnapshot(section: .info)
                 self.toolbarItems = self.isEditing ? self.editToolBarItem() : self.defaultToolBarItem()
             }.store(in: &subscriptions)
         
@@ -70,7 +70,7 @@ class HomeViewController: UIViewController {
             .receive(on: RunLoop.main)
             .sink { [weak self] items in
                 guard let self = self else { return }
-                let filteredHomeItems = items.map { HomeViewModel.Item.informationItem($0) }
+                let filteredHomeItems = items.map { HomeViewModel.Item.infoItem($0) }
                 self.applyFilteredSnapshot(searchItems: filteredHomeItems)
                 reconfigureSnapshot(section: .category)
             }.store(in: &subscriptions)
@@ -240,7 +240,7 @@ class HomeViewController: UIViewController {
             
             var accessories: [UICellAccessory] = [.customView(configuration: circleAccessory)]
             
-            if case let .informationItem(info) = item, self.viewModel.selectedItems.value.contains(info) {
+            if case let .infoItem(info) = item, self.viewModel.selectedItems.value.contains(info) {
                 accessories = [.customView(configuration: checkAccessory)]
             }
             cell.accessories = accessories
@@ -257,7 +257,7 @@ class HomeViewController: UIViewController {
                 cell.layer.cornerRadius = 17
                 cell.configure(item: item)
                 return cell
-            case .informationItem:
+            case .infoItem:
                 return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
             }
         }
@@ -287,10 +287,10 @@ class HomeViewController: UIViewController {
     
     private func applyFilteredSnapshot(searchItems: [HomeViewModel.Item]) {
         var snapshot = dataSource.snapshot()
-        let existingItems = snapshot.itemIdentifiers(inSection: .information)
+        let existingItems = snapshot.itemIdentifiers(inSection: .info)
         snapshot.deleteItems(existingItems)
-        snapshot.appendItems(searchItems, toSection: .information)
-        dataSource.apply(snapshot, animatingDifferences: false)
+        snapshot.appendItems(searchItems, toSection: .info)
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
     
     private func layout() -> UICollectionViewCompositionalLayout {
@@ -321,7 +321,7 @@ class HomeViewController: UIViewController {
     private func presentViewController(item: HomeViewModel.Item) {
         let storyboard = UIStoryboard(name: "DetailInfo", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "DetailInfoViewController") as! DetailInfoViewController
-        if case .informationItem(let infoData) = item {
+        if case .infoItem(let infoData) = item {
             vc.viewModel = DetailInfoViewModel(infoItem: infoData)
         }
         self.navigationController?.pushViewController(vc, animated: true)
@@ -335,7 +335,7 @@ extension HomeViewController: UICollectionViewDelegate, UISearchBarDelegate {
             if let item = dataSource.itemIdentifier(for: indexPath) {
                 viewModel.didCategorySelect(id: item.id)
             }
-        case .information:
+        case .info:
             if let item = dataSource.itemIdentifier(for: indexPath) {
                 viewModel.didInfoSelect(id: item.id)
             }
@@ -347,7 +347,7 @@ extension HomeViewController: UICollectionViewDelegate, UISearchBarDelegate {
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         viewModel.filteredItems.value = searchManager.filterItems(viewModel.infoItems.value, with: searchText)
-        let filteredHomeItems = viewModel.filteredItems.value.map { HomeViewModel.Item.informationItem($0) }
+        let filteredHomeItems = viewModel.filteredItems.value.map { HomeViewModel.Item.infoItem($0) }
         applyFilteredSnapshot(searchItems: filteredHomeItems)
     }
     

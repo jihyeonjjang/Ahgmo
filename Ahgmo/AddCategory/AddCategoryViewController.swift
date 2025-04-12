@@ -133,6 +133,6 @@ extension AddCategoryViewController: UICollectionViewDelegate, UITextFieldDelega
     }
     
     func textFieldDidChangeSelection(_ textField: UITextField) {
-            viewModel.userInput.send(textField.text ?? "")
+        viewModel.userInput.send(textField.text ?? "")
     }
 }
