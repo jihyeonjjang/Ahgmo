@@ -44,14 +44,13 @@ final class CoreDataManager {
     }
     
     @discardableResult
-    func saveCategory(title: String, isSelected: Bool) -> UUID? {
+    func saveCategory(title: String) -> UUID? {
         let entity = NSEntityDescription.entity(forEntityName: "CategoryEntity", in: self.context)
         if let entity = entity {
             let managedObject = NSManagedObject(entity: entity, insertInto: self.context)
             let id = UUID()
             managedObject.setValue(id, forKey: "id")
             managedObject.setValue(title, forKey: "title")
-            managedObject.setValue(isSelected, forKey: "isSelected")
             
             do {
                 try self.context.save()
@@ -151,22 +150,18 @@ final class CoreDataManager {
         let category1 = CategoryEntity(context: context)
         category1.id = UUID()
         category1.title = "요리"
-        category1.isSelected = false
         
         let category2 = CategoryEntity(context: context)
         category2.id = UUID()
         category2.title = "신발"
-        category2.isSelected = false
         
         let category3 = CategoryEntity(context: context)
         category3.id = UUID()
         category3.title = "코스트코"
-        category3.isSelected = false
         
         let category4 = CategoryEntity(context: context)
         category4.id = UUID()
         category4.title = "아우터"
-        category4.isSelected = false
         
         let info1 = InfoEntity(context: context)
         info1.id = UUID()

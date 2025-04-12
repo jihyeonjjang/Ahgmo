@@ -23,6 +23,6 @@ final class AddCategoryViewModel {
     
     func saveCategory() {
         guard !userInput.value.isEmpty else { return }
-        CoreDataManager.shared.saveCategory(title: userInput.value, isSelected: false)
+        CoreDataManager.shared.saveCategory(title: userInput.value)
     }
 }
