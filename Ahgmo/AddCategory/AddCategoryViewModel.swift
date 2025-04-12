@@ -18,6 +18,7 @@ final class AddCategoryViewModel {
     enum Section {
         case main
     }
+    
     typealias Item = String
     
     func saveCategory() {
