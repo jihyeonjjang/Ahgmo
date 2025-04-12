@@ -353,12 +353,12 @@ extension HomeViewController: UICollectionViewDelegate, UISearchBarDelegate {
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
         viewModel.filteredItems.value = viewModel.infoItems.value
-        viewModel.categoryItems.value.indices
-            .forEach { viewModel.categoryItems.value[$0].isSelected = false }
-        var items: [HomeViewModel.Section: [HomeViewModel.Item]] = [:]
-        items[.category] = viewModel.categoryItems.value.map { HomeViewModel.Item.categoryItem($0) }
-        items[.information] = viewModel.infoItems.value.map { HomeViewModel.Item.informationItem($0) }
-        applySnapshot(items)
+//        viewModel.categoryItems.value.indices
+//            .forEach { viewModel.categoryItems.value[$0].isSelected = false }
+//        var items: [HomeViewModel.Section: [HomeViewModel.Item]] = [:]
+//        items[.category] = viewModel.categoryItems.value.map { HomeViewModel.Item.categoryItem($0) }
+//        items[.info] = viewModel.infoItems.value.map { HomeViewModel.Item.infoItem($0) }
+//        applySnapshot(items)
     }
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
@@ -367,9 +367,9 @@ extension HomeViewController: UICollectionViewDelegate, UISearchBarDelegate {
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         viewModel.filteredItems.value = viewModel.infoItems.value
-        var items: [HomeViewModel.Section: [HomeViewModel.Item]] = [:]
-        items[.category] = viewModel.categoryItems.value.map { HomeViewModel.Item.categoryItem($0) }
-        items[.information] = viewModel.infoItems.value.map { HomeViewModel.Item.informationItem($0) }
-        applySnapshot(items)
+//        var items: [HomeViewModel.Section: [HomeViewModel.Item]] = [:]
+//        items[.category] = viewModel.categoryItems.value.map { HomeViewModel.Item.categoryItem($0) }
+//        items[.info] = viewModel.infoItems.value.map { HomeViewModel.Item.infoItem($0) }
+//        applySnapshot(items)
     }
 }
