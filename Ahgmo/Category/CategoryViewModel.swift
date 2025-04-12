@@ -11,9 +11,11 @@ import CoreData
 
 final class CategoryViewModel: NSObject, NSFetchedResultsControllerDelegate {
     let categoryItems: CurrentValueSubject<[CategoryEntity], Never>
-    let selectedItem: CurrentValueSubject<CategoryEntity?, Never>
+    let selectedItem: CurrentValueSubject<UUID?, Never>
     
-    init(selectedItem: CategoryEntity? = nil) {
+    private var categoryController: NSFetchedResultsController<CategoryEntity>!
+    
+    init(selectedItem: UUID? = nil) {
         self.categoryItems = CurrentValueSubject([])
         self.selectedItem = CurrentValueSubject(selectedItem)
         super.init()
@@ -39,9 +41,7 @@ final class CategoryViewModel: NSObject, NSFetchedResultsControllerDelegate {
     typealias Item = CategoryEntity
     
     func didSelect(id: UUID) {
-        if let category = categoryItems.value.first(where: { $0.id == id }) {
-            selectedItem.send(category)
-        }
+        selectedItem.send(id)
     }
     
     func deleteItem(id: UUID) {

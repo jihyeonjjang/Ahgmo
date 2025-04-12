@@ -37,6 +37,7 @@ class EditCategoryViewController: UIViewController {
             .receive(on: RunLoop.main)
             .sink { [weak self] data in
                 guard let self = self else { return }
+                guard let data = data else { return }
                 self.applySnapshot(data)
             }.store(in: &subscriptions)
     }

@@ -44,9 +44,9 @@ class CategoryViewController: UIViewController {
         viewModel.selectedItem
             .compactMap { $0 }
             .receive(on: RunLoop.main)
-            .sink { [weak self] selectedItem in
+            .sink { [weak self] selectedItemID in
                 guard let self = self else { return }
-                self.presentViewController(item: selectedItem)
+                self.presentViewController(id: selectedItemID)
             }.store(in: &subscriptions)
     }
     
@@ -178,10 +178,10 @@ class CategoryViewController: UIViewController {
         dataSource.apply(snapshot, animatingDifferences: true)
     }
     
-    private func presentViewController(item: CategoryViewModel.Item) {
+    private func presentViewController(id: UUID) {
         let storyboard = UIStoryboard(name: "EditCategory", bundle: nil)
         let vc = storyboard.instantiateViewController(withIdentifier: "EditCategoryViewController") as! EditCategoryViewController
-        vc.viewModel = EditCategoryViewModel(categoryItems: item)
+        vc.viewModel = EditCategoryViewModel(categoryID: id)
         self.navigationController?.pushViewController(vc, animated: true)
     }
 }
