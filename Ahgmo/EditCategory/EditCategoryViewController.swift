@@ -101,19 +101,19 @@ class EditCategoryViewController: UIViewController {
     }
 
     private func hideKeyBoardWhenTappedScreen() {
-         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
-         tapGesture.cancelsTouchesInView = false
-         view.addGestureRecognizer(tapGesture)
-     }
-     
-     @objc func tapHandler() {
-         keyboardWillHide.send()
-     }
-     
-     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-         keyboardWillHide.send()
-         return true
-     }
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapHandler))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc func tapHandler() {
+        keyboardWillHide.send()
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        keyboardWillHide.send()
+        return true
+    }
 }
 
 extension EditCategoryViewController: UICollectionViewDelegate, UITextFieldDelegate, UIGestureRecognizerDelegate {
