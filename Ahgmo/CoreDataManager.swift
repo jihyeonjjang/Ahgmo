@@ -27,9 +27,7 @@ final class CoreDataManager {
         return container
     }()
     
-    var context: NSManagedObjectContext {
-        return persistentContainer.viewContext
-    }
+    var context: NSManagedObjectContext { return persistentContainer.viewContext }
     
     func saveContext () {
         let context = persistentContainer.viewContext
