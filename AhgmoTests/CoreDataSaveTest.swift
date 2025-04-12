@@ -22,7 +22,7 @@ final class CoreDataSaveTest: XCTestCase {
     }
     
     func testSaveCategoryEntity() throws {
-        CoreDataManager.shared.saveCategory(title: "Test Category", isSelected: false)
+        CoreDataManager.shared.saveCategory(title: "Test Category")
         
         guard let fetchedResultsController = CoreDataManager.shared.fetch(for: CategoryEntity.self) else { return }
         self.categoryController = fetchedResultsController
@@ -33,7 +33,7 @@ final class CoreDataSaveTest: XCTestCase {
     }
     
     func testSaveInfoEntity() throws {
-        guard let savedCategoryID = CoreDataManager.shared.saveCategory(title: "Test Category", isSelected: false) else { return }
+        guard let savedCategoryID = CoreDataManager.shared.saveCategory(title: "Test Category") else { return }
         
         CoreDataManager.shared.saveInfo(title: "Test Information", details: "Test Description", urlString: "https://example.com" , imageURL: "https://example2.com", categoryID: savedCategoryID)
         

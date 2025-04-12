@@ -62,18 +62,31 @@ final class HomeViewModel: NSObject, NSFetchedResultsControllerDelegate  {
     
     enum Section: Int, CaseIterable {
         case category
-        case information
+        case info
+    }
+    
+    struct CategoryItemModel: Hashable {
+        let entity: CategoryEntity
+        var isSelected: Bool = false
+        
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(entity.id)
+        }
+        
+        static func == (lhs: CategoryItemModel, rhs: CategoryItemModel) -> Bool {
+            return lhs.entity.id == rhs.entity.id
+        }
     }
     
     enum Item: Hashable {
-        case categoryItem(CategoryEntity)
-        case informationItem(InfoEntity)
+        case categoryItem(CategoryItemModel)
+        case infoItem(InfoEntity)
         
         var title: String {
             switch self {
             case .categoryItem(let data):
-                return data.title!
-            case .informationItem(let data):
+                return data.entity.title!
+            case .infoItem(let data):
                 return data.title!
             }
         }
@@ -81,25 +94,39 @@ final class HomeViewModel: NSObject, NSFetchedResultsControllerDelegate  {
         var id: UUID {
             switch self {
             case .categoryItem(let data):
+                return data.entity.id!
+            case .infoItem(let data):
                 return data.id!
-            case .informationItem(let data):
-                return data.id!
+            }
+        }
+        
+        var isSelected: Bool? {
+            switch self {
+            case .categoryItem(let data):
+                return data.isSelected
+            case .infoItem:
+                return nil
             }
         }
     }
 
     func didCategorySelect(id: UUID) {
-        if let categoryIndex = categoryItems.value.firstIndex(where: { $0.id == id }) {
-            categoryItems.value[categoryIndex].isSelected.toggle()
-            categoryItems.value.indices
+        var categories = categoryItems.value
+        if let categoryIndex = categories.firstIndex(where: { $0.entity.id == id }) {
+            categories[categoryIndex].isSelected.toggle()
+            
+            categories.indices
                 .filter { $0 != categoryIndex }
-                .forEach { categoryItems.value[$0].isSelected = false }
-            if !categoryItems.value[categoryIndex].isSelected {
-                filteredItems.send(infoItems.value)
-            } else {
-                let selectedCategory = categoryItems.value[categoryIndex]
-                let filteredInfos = infoItems.value.filter { $0.categoryItem?.title == selectedCategory.title }
+                .forEach { categories[$0].isSelected = false }
+            
+            categoryItems.value = categories
+
+            let selectedCategory = categories[categoryIndex]
+            if selectedCategory.isSelected {
+                let filteredInfos = infoItems.value.filter { $0.categoryItem?.title == selectedCategory.entity.title }
                 filteredItems.send(filteredInfos)
+            } else {
+                filteredItems.send(infoItems.value)
             }
         }
     }
