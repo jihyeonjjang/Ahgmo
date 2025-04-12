@@ -275,7 +275,7 @@ class HomeViewController: UIViewController {
         for (section, item) in items {
             snapshot.appendItems(item, toSection: section)
         }
-        dataSource.apply(snapshot, animatingDifferences: false)
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
     
     private func reconfigureSnapshot(section: HomeViewModel.Section) {
