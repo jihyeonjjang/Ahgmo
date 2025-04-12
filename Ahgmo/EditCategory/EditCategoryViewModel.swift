@@ -32,4 +32,10 @@ final class EditCategoryViewModel {
     }
     
     typealias Item = CategoryEntity
+    
+    func updateCategory() {
+        guard !userInput.value.isEmpty else { return }
+        if categoryItem.value?.title == userInput.value { return }
+        CoreDataManager.shared.updateCategory(id: categoryID.value, title: userInput.value)
+    }
 }

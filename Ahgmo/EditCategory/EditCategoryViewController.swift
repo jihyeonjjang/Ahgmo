@@ -57,8 +57,8 @@ class EditCategoryViewController: UIViewController {
     }
     
     @objc private func navigateToPage(_ sender: UIBarButtonItem) {
-        // 임시
-        self.dismiss(animated: true, completion: nil)
+        viewModel.updateCategory()
+        self.navigationController?.popViewController(animated: true)
     }
     
     private func configureCollectionView() {
@@ -120,5 +120,10 @@ class EditCategoryViewController: UIViewController {
 extension EditCategoryViewController: UICollectionViewDelegate, UITextFieldDelegate, UIGestureRecognizerDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
+    }
+    
+    func textFieldDidChangeSelection(_ textField: UITextField) {
+        viewModel.userInput.send(textField.text ?? "")
+        print(textField.text ?? "none")
     }
 }
