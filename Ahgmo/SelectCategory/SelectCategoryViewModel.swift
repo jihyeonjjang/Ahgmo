@@ -9,21 +9,32 @@ import Foundation
 import Combine
 import CoreData
 
-final class SelectCategoryViewModel {
+final class SelectCategoryViewModel: NSObject, NSFetchedResultsControllerDelegate {
     let categoryItems: CurrentValueSubject<[CategoryEntity], Never>
     let initialCategory: CurrentValueSubject<CategoryEntity?, Never>
     let selectedItem: CurrentValueSubject<CategoryEntity?, Never>
+    
+    private var categoryController: NSFetchedResultsController<CategoryEntity>!
     
     init(initialCategory: CategoryEntity? = nil, selectedItem: CategoryEntity? = nil) {
         self.categoryItems = CurrentValueSubject([])
         self.initialCategory = CurrentValueSubject(initialCategory)
         self.selectedItem = CurrentValueSubject(selectedItem)
+        super.init()
         fetchCategories()
     }
     
     private func fetchCategories() {
-        let categoryFetchRequest = NSFetchRequest<CategoryEntity>(entityName: "CategoryEntity")
-        self.categoryItems.value = CoreDataManager.shared.fetchContext(request: categoryFetchRequest)
+        guard let fetchedResultsController = CoreDataManager.shared.fetch(for: CategoryEntity.self) else { return }
+        self.categoryController = fetchedResultsController
+        self.categoryController.delegate = self
+        categoryItems.value = self.categoryController.fetchedObjects ?? []
+    }
+    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        if let updatedCategories = controller.fetchedObjects as? [CategoryEntity] {
+            categoryItems.send(updatedCategories)
+        }
     }
     
     enum Section {

@@ -9,13 +9,16 @@ import Foundation
 import Combine
 import CoreData
 
-final class HomeViewModel {
-    let categoryItems: CurrentValueSubject<[CategoryEntity], Never>
-    let infoItems: CurrentValueSubject<[InfoEntity], Never>
+final class HomeViewModel: NSObject, NSFetchedResultsControllerDelegate  {
+    var categoryItems: CurrentValueSubject<[CategoryItemModel], Never>
+    var infoItems: CurrentValueSubject<[InfoEntity], Never>
     var filteredItems: CurrentValueSubject<[InfoEntity], Never>
     var selectedInfo: CurrentValueSubject<InfoEntity?, Never>
     var selectedItems: CurrentValueSubject<Set<InfoEntity>, Never>
     var isSelectAll: CurrentValueSubject<Bool, Never>
+    
+    private var categoryController: NSFetchedResultsController<CategoryEntity>!
+    private var infoController: NSFetchedResultsController<InfoEntity>!
     
     init(selectedInfo: InfoEntity? = nil) {
         self.categoryItems = CurrentValueSubject([])
@@ -24,17 +27,37 @@ final class HomeViewModel {
         self.selectedInfo = CurrentValueSubject(selectedInfo)
         self.selectedItems = CurrentValueSubject([])
         self.isSelectAll = CurrentValueSubject(false)
-        fetchDatas()
+        super.init()
+        fetchCategories()
+        fetchInfos()
     }
     
-    private func fetchDatas() {
-        let categoryFetchRequest = NSFetchRequest<CategoryEntity>(entityName: "CategoryEntity")
-        let informationsFetchRequest = NSFetchRequest<InfoEntity>(entityName: "InfoEntity")
+    private func fetchCategories() {
+        guard let fetchedResultsController = CoreDataManager.shared.fetch(for: CategoryEntity.self) else { return }
+        self.categoryController = fetchedResultsController
+        self.categoryController.delegate = self
+        let entities: [CategoryEntity] = self.categoryController.fetchedObjects ?? []
+        categoryItems.value = entities.map { CategoryItemModel(entity: $0, isSelected: false) }
+    }
+    
+    private func fetchInfos() {
+        guard let fetchedResultsController = CoreDataManager.shared.fetch(for: InfoEntity.self) else { return }
+        self.infoController = fetchedResultsController
+        self.infoController.delegate = self
+        infoItems.value = self.infoController.fetchedObjects ?? []
+        filteredItems.value = infoItems.value
+    }
+    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        if let updatedCategories = controller.fetchedObjects as? [CategoryEntity] {
+            let entities: [CategoryEntity] = updatedCategories
+            categoryItems.value = entities.map { CategoryItemModel(entity: $0, isSelected: false) }
+//            categoryItems.send(updatedCategories)
+        }
         
-        self.categoryItems.value = CoreDataManager.shared.fetchContext(request: categoryFetchRequest)
-        let informations = CoreDataManager.shared.fetchContext(request: informationsFetchRequest)
-        self.infoItems.value = informations
-        self.filteredItems.value = informations
+        if let updatedInfos = controller.fetchedObjects as? [InfoEntity] {
+            infoItems.send(updatedInfos)
+        }
     }
     
     enum Section: Int, CaseIterable {

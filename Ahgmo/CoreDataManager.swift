@@ -41,6 +41,49 @@ final class CoreDataManager {
         }
     }
     
+    func fetch<T: NSManagedObject>(for entityType: T.Type) -> NSFetchedResultsController<T>? {
+        let fetchRequest: NSFetchRequest<T> = NSFetchRequest<T>(entityName: String(describing: entityType))
+        
+        if entityType == CategoryEntity.self {
+            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        } else if entityType == InfoEntity.self {
+            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        } else if entityType == SortTypeEntity.self  {
+            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: false)]
+        } else {
+            return nil
+        }
+        
+        let controller = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: context,
+            sectionNameKeyPath: nil,
+            cacheName: nil
+        )
+        
+        do {
+            try controller.performFetch()
+        } catch {
+            print("Failed to fetch \(entityType): \(error.localizedDescription)")
+            return nil
+        }
+        return controller
+    }
+    
+    func fetchSingleEntity<T: NSManagedObject>(ofType type: T.Type, withPredicate predicate: NSPredicate? = nil) -> T? {
+        let request = T.fetchRequest()
+        request.predicate = predicate
+        request.fetchLimit = 1
+        
+        do {
+            let results = try context.fetch(request) as? [T]
+            return results?.first
+        } catch {
+            print("Fetch error:", error)
+            return nil
+        }
+    }
+    
     @discardableResult
     func saveCategory(title: String) -> UUID? {
         let entity = NSEntityDescription.entity(forEntityName: "CategoryEntity", in: self.context)
@@ -63,13 +106,6 @@ final class CoreDataManager {
         }
     }
     
-    func fetchCategory(by id: UUID) -> CategoryEntity? {
-        let fetchRequest: NSFetchRequest<CategoryEntity> = CategoryEntity.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
-
-        return try? self.context.fetch(fetchRequest).first
-    }
-    
     @discardableResult
     func saveInfo(title: String, details: String?, urlString: String, imageURL: String?, categoryID: UUID) -> UUID? {
         let entity = NSEntityDescription.entity(forEntityName: "InfoEntity", in: self.context)
@@ -81,9 +117,10 @@ final class CoreDataManager {
             managedObject.setValue(details, forKey: "details")
             managedObject.setValue(urlString, forKey: "urlString")
             managedObject.setValue(imageURL, forKey: "imageURL")
-            if let category = CoreDataManager.shared.fetchCategory(by: categoryID) {
-                managedObject.setValue(category, forKey: "categoryItem")
-            }
+            
+            let predicate = NSPredicate(format: "id == %@", categoryID as CVarArg)
+            guard let category = fetchSingleEntity(ofType: CategoryEntity.self, withPredicate: predicate) else { return nil }
+            managedObject.setValue(category, forKey: "categoryItem")
             
             do {
                 try self.context.save()

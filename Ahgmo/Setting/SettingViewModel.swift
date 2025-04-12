@@ -9,21 +9,32 @@ import Foundation
 import Combine
 import CoreData
 
-final class SettingViewModel {
+final class SettingViewModel: NSObject, NSFetchedResultsControllerDelegate {
     let sortingItems: CurrentValueSubject<[SortTypeEntity], Never>
     let serviceItems: CurrentValueSubject<[String], Never>
     let selectedItem: CurrentValueSubject<String?, Never>
+    
+    private var sortTypeController: NSFetchedResultsController<SortTypeEntity>!
     
     init(serviceItems: [String], selectedItem: String? = nil) {
         self.sortingItems = CurrentValueSubject([])
         self.serviceItems = CurrentValueSubject(serviceItems)
         self.selectedItem = CurrentValueSubject(selectedItem)
+        super.init()
         fetchSortTypes()
     }
     
     private func fetchSortTypes() {
-        let sortTypeFetchRequest = NSFetchRequest<SortTypeEntity>(entityName: "SortTypeEntity")
-        self.sortingItems.value = CoreDataManager.shared.fetchContext(request: sortTypeFetchRequest)
+        guard let fetchedResultsController = CoreDataManager.shared.fetch(for: SortTypeEntity.self) else { return }
+        self.sortTypeController = fetchedResultsController
+        self.sortTypeController.delegate = self
+        sortingItems.value = self.sortTypeController.fetchedObjects ?? []
+    }
+    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        if let updatedSortingItems = controller.fetchedObjects as? [SortTypeEntity] {
+            sortingItems.send(updatedSortingItems)
+        }
     }
     
     enum Section: Int, CaseIterable {

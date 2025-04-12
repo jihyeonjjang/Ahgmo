@@ -10,21 +10,23 @@ import CoreData
 @testable import Ahgmo
 
 final class CoreDataSaveTest: XCTestCase {
-    var managedObjectContext: NSManagedObjectContext!
+    private var categoryController: NSFetchedResultsController<CategoryEntity>!
+    private var infoController: NSFetchedResultsController<InfoEntity>!
+    
     override func setUpWithError() throws {
-        managedObjectContext = CoreDataManager.shared.context
+
     }
     
     override func tearDownWithError() throws {
-        managedObjectContext = nil
-        
+
     }
     
     func testSaveCategoryEntity() throws {
         CoreDataManager.shared.saveCategory(title: "Test Category", isSelected: false)
         
-        let fetchRequest = NSFetchRequest<CategoryEntity>(entityName: "CategoryEntity")
-        let results = CoreDataManager.shared.fetchContext(request: fetchRequest)
+        guard let fetchedResultsController = CoreDataManager.shared.fetch(for: CategoryEntity.self) else { return }
+        self.categoryController = fetchedResultsController
+        let results = self.categoryController.fetchedObjects ?? []
         
         XCTAssertEqual(results.count, 1, "count error")
         XCTAssertEqual(results.first?.title, "Test Category", "title error")
@@ -35,8 +37,9 @@ final class CoreDataSaveTest: XCTestCase {
         
         CoreDataManager.shared.saveInfo(title: "Test Information", details: "Test Description", urlString: "https://example.com" , imageURL: "https://example2.com", categoryID: savedCategoryID)
         
-        let fetchRequest: NSFetchRequest<InfoEntity> = InfoEntity.fetchRequest()
-        let results = try managedObjectContext.fetch(fetchRequest)
+        guard let fetchedResultsController = CoreDataManager.shared.fetch(for: InfoEntity.self) else { return }
+        self.infoController = fetchedResultsController
+        let results = self.infoController.fetchedObjects ?? []
         
         XCTAssertEqual(results.count, 1, "count error")
         XCTAssertEqual(results.first?.title, "Test Information", "title error")
