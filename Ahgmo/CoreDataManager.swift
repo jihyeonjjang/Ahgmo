@@ -135,13 +135,57 @@ final class CoreDataManager {
         }
     }
     
-    func fetchContext<T: NSManagedObject>(request: NSFetchRequest<T>) -> [T] {
+    @discardableResult
+    func updateCategory(id: UUID, title: String) -> UUID? {
+        let predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        guard let category = fetchSingleEntity(ofType: CategoryEntity.self, withPredicate: predicate) else { return nil }
+        category.title = title
+        
         do {
-            let fetchResult = try self.context.fetch(request)
-            return fetchResult
-        } catch let error {
-            print("data fetch error: \(error.localizedDescription)")
-            return []
+            try context.save()
+            print("category update")
+            return id
+        } catch {
+            print("info update error: \(error)")
+            return nil
+        }
+    }
+    
+    @discardableResult
+    func updateInfo(id: UUID, title: String?, details: String?, urlString: String?, imageURL: String?, categoryID: UUID?) -> UUID? {
+        let predicate = NSPredicate(format: "id == %@", id as CVarArg)
+        guard let info = fetchSingleEntity(ofType: InfoEntity.self, withPredicate: predicate) else { return nil }
+        
+        if let title = title {
+            info.title = title
+        }
+        
+        if let details = details {
+            info.details = details
+        }
+        
+        if let urlString = urlString {
+            info.urlString = urlString
+        }
+        
+        if let imageURL = imageURL {
+            info.imageURL = imageURL
+        }
+        
+        if let categoryID = categoryID {
+            let categoryPredicate = NSPredicate(format: "id == %@", categoryID as CVarArg)
+            if let category = fetchSingleEntity(ofType: CategoryEntity.self, withPredicate: categoryPredicate) {
+                info.categoryItem = category
+            }
+        }
+        
+        do {
+            try context.save()
+            print("info update")
+            return id
+        } catch {
+            print("info update error: \(error)")
+            return nil
         }
     }
     
